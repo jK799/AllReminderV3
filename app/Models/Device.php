@@ -13,8 +13,13 @@ class Device extends Model
     protected $fillable = [
         'user_id',
         'name',
-        'type',
+        'brand',
+        'model',
+        'serial_number',
+        'purchase_date',
+        'notes',
     ];
+    
 
     public function user(): BelongsTo
     {

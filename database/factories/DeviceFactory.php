@@ -15,9 +15,15 @@ class DeviceFactory extends Factory
      * @return array<string, mixed>
      */
     public function definition(): array
-    {
-        return [
-            //
-        ];
-    }
+{
+    return [
+        'name' => $this->faker->words(2, true),
+        'brand' => $this->faker->optional()->randomElement(['Apple','Samsung','Dell','Lenovo','Sony']),
+        'model' => $this->faker->optional()->bothify('Model-###'),
+        'serial_number' => $this->faker->optional()->bothify('SN-########'),
+        'purchase_date' => $this->faker->optional()->date(),
+        'notes' => $this->faker->optional()->sentence(),
+    ];
+}
+
 }
