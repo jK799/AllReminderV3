@@ -4,9 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Device extends Model
+class Document extends Model
 {
     use HasFactory;
-    //
+
+    protected $fillable = [
+        'user_id',
+        'name',
+        'file_path',
+        'expires_at',
+    ];
+
+    protected $casts = [
+        'expires_at' => 'date',
+    ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }
