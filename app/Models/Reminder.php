@@ -13,13 +13,18 @@ class Reminder extends Model
     protected $fillable = [
         'user_id',
         'title',
-        'due_date',
-        'is_completed',
+        'description',
+        'due_at',
+        'completed_at',
+        'is_active',
+        'device_id',
+        'vehicle_id',
     ];
 
     protected $casts = [
-        'due_date' => 'date',
-        'is_completed' => 'boolean',
+        'due_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'is_active' => 'boolean',
     ];
 
     public function user(): BelongsTo

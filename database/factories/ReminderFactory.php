@@ -17,7 +17,11 @@ class ReminderFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'title' => $this->faker->sentence(3),
+            'description' => $this->faker->optional()->sentence(),
+            'due_at' => $this->faker->optional()->dateTimeBetween('-5 days', '+30 days'),
+            'completed_at' => null,
+            'is_active' => true,
         ];
     }
 }

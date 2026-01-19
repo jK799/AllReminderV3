@@ -13,10 +13,16 @@ class Vehicle extends Model
     protected $fillable = [
         'user_id',
         'name',
-        'brand',
+        'make',
         'model',
         'year',
         'vin',
+        'license_plate',
+        'notes',
+    ];
+
+    protected $casts = [
+        'year' => 'integer',
     ];
 
     public function user(): BelongsTo

@@ -16,8 +16,16 @@ class DocumentFactory extends Factory
      */
     public function definition(): array
     {
+        $name = $this->faker->randomElement(['polisa.pdf','faktura.pdf','zdjecie.jpg','umowa.pdf']);
+        $isJpg = str_ends_with($name, '.jpg');
+
         return [
-            //
+            'title' => $this->faker->optional()->sentence(3),
+            'notes' => $this->faker->optional()->sentence(),
+            'original_name' => $name,
+            'path' => 'documents/'.$this->faker->uuid.'-'.$name,
+            'mime_type' => $isJpg ? 'image/jpeg' : 'application/pdf',
+            'size' => $this->faker->numberBetween(50_000, 5_000_000),
         ];
     }
 }

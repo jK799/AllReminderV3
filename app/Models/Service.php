@@ -12,9 +12,22 @@ class Service extends Model
 
     protected $fillable = [
         'user_id',
-        'name',
+        'title',
         'description',
-        'interval_days',
+        'last_done_at',
+        'next_due_at',
+        'interval_value',
+        'interval_unit',
+        'is_active',
+        'device_id',
+        'vehicle_id',
+    ];
+
+    protected $casts = [
+        'last_done_at' => 'date',
+        'next_due_at' => 'datetime',
+        'interval_value' => 'integer',
+        'is_active' => 'boolean',
     ];
 
     public function user(): BelongsTo

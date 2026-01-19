@@ -15,9 +15,19 @@ class VehicleFactory extends Factory
      * @return array<string, mixed>
      */
     public function definition(): array
-    {
-        return [
-            //
-        ];
-    }
+{
+    $make = $this->faker->randomElement(['BMW', 'Audi', 'Mercedes', 'Toyota', 'Ford']);
+    $model = $this->faker->bothify('??##');
+
+    return [
+        'name' => $make . ' ' . $model, // <- MUSI być
+        'make' => $make,
+        'model' => $model,
+        'year' => $this->faker->optional()->numberBetween(1998, 2026),
+        'vin' => $this->faker->optional()->regexify('[A-HJ-NPR-Z0-9]{17}'),
+        'license_plate' => $this->faker->optional()->bothify('KR ####?'),
+        'notes' => $this->faker->optional()->sentence(),
+    ];
+}
+
 }

@@ -19,7 +19,10 @@ class Device extends Model
         'purchase_date',
         'notes',
     ];
-    
+
+    protected $casts = [
+        'purchase_date' => 'date',
+    ];
 
     public function user(): BelongsTo
     {
