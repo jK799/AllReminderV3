@@ -23,15 +23,13 @@ class DeviceController extends Controller
 
     public function store(StoreDeviceRequest $request)
     {
-        $device = Device::create([
-            'user_id' => auth()->id(),
-            ...$request->validated(),
-        ]);
-
-        return (new DeviceResource($device))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
+        $user = $request->user(); // user z tokena (Sanctum)
+    
+        $device = $user->devices()->create($request->validated());
+    
+        return response()->json($device, 201);
     }
+    
 
     public function show(Device $device)
     {

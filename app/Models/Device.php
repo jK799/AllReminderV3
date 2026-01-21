@@ -11,7 +11,6 @@ class Device extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
         'name',
         'brand',
         'model',
@@ -20,12 +19,9 @@ class Device extends Model
         'notes',
     ];
 
-    protected $casts = [
-        'purchase_date' => 'date',
-    ];
-
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 }
+
