@@ -12,19 +12,12 @@ use App\Http\Controllers\Api\DocumentController;
 Route::get('/ping', fn () => response()->json(['ok' => true]));
 
 // AUTH (public)
-Route::prefix('auth')->group(function () {
-    Route::post('register', [AuthController::class, 'register']);
-    Route::post('login',    [AuthController::class, 'login']);
-});
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login',    [AuthController::class, 'login']);
 
-// AUTH (protected)
 Route::middleware('auth:sanctum')->group(function () {
-
-    Route::prefix('auth')->group(function () {
-        Route::post('logout', [AuthController::class, 'logout']);
-    });
-
-    Route::get('me', fn (\Illuminate\Http\Request $r) => $r->user());
+    Route::get('/me', fn (\Illuminate\Http\Request $r) => $r->user());
+    Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::apiResource('devices', DeviceController::class);
     Route::apiResource('vehicles', VehicleController::class);

@@ -3,77 +3,65 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request)
+    public function register(Request $request)
     {
-        $data = $request->validated();
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'email' => ['required', 'email', 'max:190', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
 
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => $data['password'], // u Ciebie jest cast 'hashed' więc Laravel sam zahashuje
         ]);
 
-        // usuń ewentualne stare tokeny (opcjonalnie)
-        $user->tokens()->delete();
-
-        $token = $user->createToken('api')->plainTextToken;
+        $token = $user->createToken('web')->plainTextToken;
 
         return response()->json([
-            'message' => 'Registered',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ],
             'token' => $token,
+            'user' => $user,
         ], 201);
     }
 
-    public function login(LoginRequest $request)
+    public function login(Request $request)
     {
-        $data = $request->validated();
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
 
         $user = User::where('email', $data['email'])->first();
 
-        if (!$user || !Hash::check($data['password'], $user->password)) {
-            return response()->json([
-                'message' => 'Invalid credentials',
-            ], 422);
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['Nieprawidłowy email lub hasło.'],
+            ]);
         }
 
-        // najprościej: 1 aktywny token na usera
+        // opcjonalnie: kasujemy stare tokeny żeby nie mnożyć
         $user->tokens()->delete();
 
-        $token = $user->createToken('api')->plainTextToken;
+        $token = $user->createToken('web')->plainTextToken;
 
         return response()->json([
-            'message' => 'Logged in',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ],
             'token' => $token,
+            'user' => $user,
         ]);
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        $user = auth()->user();
+        $request->user()->currentAccessToken()?->delete();
 
-        if ($user) {
-            $user->currentAccessToken()?->delete();
-        }
-
-        return response()->json([
-            'message' => 'Logged out',
-        ]);
+        return response()->json(['ok' => true]);
     }
 }
