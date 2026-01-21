@@ -7,21 +7,12 @@ const api = axios.create({
   },
 });
 
-export function setToken(token) {
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
   if (token) {
-    localStorage.setItem("token", token);
-    api.defaults.headers.common.Authorization = `Bearer ${token}`;
-  } else {
-    localStorage.removeItem("token");
-    delete api.defaults.headers.common.Authorization;
+    config.headers.Authorization = `Bearer ${token}`;
   }
-}
-
-export function getToken() {
-  return localStorage.getItem("token");
-}
-
-// ustaw token przy starcie
-setToken(getToken());
+  return config;
+});
 
 export default api;

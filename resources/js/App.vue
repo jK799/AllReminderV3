@@ -1,51 +1,23 @@
 <template>
-    <div class="min-h-screen bg-zinc-950 text-zinc-100">
-      <header class="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur">
-        <div class="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
-          <div class="font-semibold">AllReminder</div>
+    <div class="min-h-screen">
+      <nav class="border-b border-slate-800 bg-slate-900/40">
+        <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+          <div class="font-semibold tracking-wide">
+            AllReminderV3
+          </div>
   
-          <nav class="flex items-center gap-2">
-            <RouterLink
-              v-if="isAuthed"
-              to="/documents"
-              class="px-3 py-2 rounded-lg hover:bg-zinc-800"
-              >Dokumenty</RouterLink
-            >
-            <RouterLink
-              v-if="isAuthed"
-              to="/upload"
-              class="px-3 py-2 rounded-lg hover:bg-zinc-800"
-              >Upload</RouterLink
-            >
-  
-            <button
-              v-if="isAuthed"
-              @click="logout"
-              class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700"
-            >
-              Wyloguj
-            </button>
-          </nav>
+          <div class="flex gap-3 text-sm">
+            <RouterLink class="hover:text-white text-slate-300" to="/dashboard">Dashboard</RouterLink>
+            <RouterLink class="hover:text-white text-slate-300" to="/documents">Dokumenty</RouterLink>
+            <RouterLink class="hover:text-white text-slate-300" to="/upload">Upload</RouterLink>
+            <RouterLink class="hover:text-white text-slate-300" to="/login">Login</RouterLink>
+          </div>
         </div>
-      </header>
+      </nav>
   
-      <main class="mx-auto max-w-5xl px-4 py-8">
+      <main class="mx-auto max-w-6xl px-4 py-6">
         <RouterView />
       </main>
     </div>
   </template>
-  
-  <script setup>
-  import { computed } from "vue";
-  import { useRouter } from "vue-router";
-  import { clearToken, getToken } from "./api";
-  
-  const router = useRouter();
-  const isAuthed = computed(() => !!getToken());
-  
-  function logout() {
-    clearToken();
-    router.push("/login");
-  }
-  </script>
   

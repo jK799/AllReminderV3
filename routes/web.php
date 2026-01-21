@@ -2,4 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::view('/app/{any?}', 'app')->where('any', '.*');
+// SPA entry
+Route::view('/', 'app')->name('spa');
+
+Route::view('/{any}', 'app')
+    ->where('any', '.*');
