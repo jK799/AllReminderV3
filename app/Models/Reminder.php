@@ -10,16 +10,22 @@ class Reminder extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
+        'device_id',
+        'vehicle_id',
         'title',
         'description',
+        'due_at',
+        'completed_at',
+        'is_active',
         'remind_at',
-        'user_id',
-        'remindable_type',
-        'remindable_id',
     ];
 
     protected $casts = [
-        'remind_at' => 'datetime',
+        'due_at'       => 'datetime',
+        'completed_at' => 'datetime',
+        'remind_at'    => 'datetime',
+        'is_active'    => 'boolean',
     ];
 
     public function user()
@@ -27,8 +33,13 @@ class Reminder extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function remindable()
+    public function device()
     {
-        return $this->morphTo();
+        return $this->belongsTo(Device::class);
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class);
     }
 }

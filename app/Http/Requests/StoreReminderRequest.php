@@ -8,21 +8,24 @@ class StoreReminderRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return true; // auth:sanctum i tak pilnuje dostępu
     }
 
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            'title'        => ['required', 'string', 'max:255'],
+            'description'  => ['nullable', 'string'],
 
-            // kluczowy field:
-            'remind_at' => ['required', 'date'],
+            // przypisanie: do device albo do vehicle albo ogólne (null/null)
+            'device_id'    => ['nullable', 'integer'],
+            'vehicle_id'   => ['nullable', 'integer'],
 
-            // opcjonalne przypisanie (polimorficzne) – możesz na razie nie wysyłać
-            'remindable_type' => ['nullable', 'string', 'max:255'],
-            'remindable_id' => ['nullable', 'integer'],
+            'due_at'       => ['required', 'date'],
+            'remind_at'    => ['nullable', 'date'],
+
+            'is_active'    => ['sometimes', 'boolean'],
+            'completed_at' => ['nullable', 'date'],
         ];
     }
 }

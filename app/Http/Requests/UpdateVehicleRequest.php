@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateVehicleRequest extends FormRequest
+class UpdateReminderRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,14 +14,17 @@ class UpdateVehicleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'make' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'model' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'year' => ['sometimes', 'nullable', 'string', 'max:10'],
-            'vin' => ['sometimes', 'nullable', 'string', 'max:50'],
-            'license_plate' => ['sometimes', 'nullable', 'string', 'max:50'],
-            'purchase_date' => ['sometimes', 'nullable', 'date'],
-            'notes' => ['sometimes', 'nullable', 'string'],
+            'title'        => ['sometimes', 'required', 'string', 'max:255'],
+            'description'  => ['sometimes', 'nullable', 'string'],
+
+            'device_id'    => ['sometimes', 'nullable', 'integer'],
+            'vehicle_id'   => ['sometimes', 'nullable', 'integer'],
+
+            'due_at'       => ['sometimes', 'required', 'date'],
+            'remind_at'    => ['sometimes', 'nullable', 'date'],
+
+            'is_active'    => ['sometimes', 'boolean'],
+            'completed_at' => ['sometimes', 'nullable', 'date'],
         ];
     }
 }
