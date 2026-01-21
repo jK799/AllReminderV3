@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
         
-            $table->string('name'); // np. "BMW E92"
-            $table->string('make')->nullable(); // marka
+            $table->string('name');
+            $table->string('make')->nullable();
             $table->string('model')->nullable();
             $table->string('year')->nullable();
             $table->string('vin')->nullable();
             $table->string('license_plate')->nullable();
-        
+            $table->date('purchase_date')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
         });

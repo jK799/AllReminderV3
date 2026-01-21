@@ -18,11 +18,12 @@ class Vehicle extends Model
         'year',
         'vin',
         'license_plate',
+        'purchase_date',
         'notes',
     ];
 
     protected $casts = [
-        'year' => 'integer',
+        'purchase_date' => 'date',
     ];
 
     public function user(): BelongsTo
