@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { getToken, bootstrapAuth } from "./services/api";
+import { useAuth } from "./composables/useAuth";
 
 import DashboardView from "./views/DashboardView.vue";
 import DocumentsView from "./views/DocumentsView.vue";
@@ -10,12 +10,12 @@ import RegisterView from "./views/RegisterView.vue";
 const routes = [
   { path: "/", redirect: "/dashboard" },
 
-  { path: "/login", component: LoginView, meta: { guestOnly: true } },
-  { path: "/register", component: RegisterView, meta: { guestOnly: true } },
+  { path: "/login", name: "login", component: LoginView, meta: { guestOnly: true } },
+  { path: "/register", name: "register", component: RegisterView, meta: { guestOnly: true } },
 
-  { path: "/dashboard", component: DashboardView, meta: { requiresAuth: true } },
-  { path: "/documents", component: DocumentsView, meta: { requiresAuth: true } },
-  { path: "/upload", component: UploadView, meta: { requiresAuth: true } },
+  { path: "/dashboard", name: "dashboard", component: DashboardView, meta: { requiresAuth: true } },
+  { path: "/documents", name: "documents", component: DocumentsView, meta: { requiresAuth: true } },
+  { path: "/upload", name: "upload", component: UploadView, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({
@@ -23,28 +23,21 @@ const router = createRouter({
   routes,
 });
 
-let bootstrapped = false;
-
 router.beforeEach(async (to) => {
-  // 1) odpal bootstrap tylko raz (po starcie / odświeżeniu)
-  if (!bootstrapped) {
-    bootstrapped = true;
-    await bootstrapAuth();
+  const auth = useAuth();
+
+  // Po odświeżeniu: jeśli jest token, dociągnij usera raz.
+  if (auth.isLoggedIn() && !auth.user.value) {
+    await auth.fetchMe();
   }
 
-  const hasToken = !!getToken();
-
-  // 2) jeśli route wymaga auth i nie ma tokenu -> login
-  if (to.meta.requiresAuth && !hasToken) {
-    return "/login";
+  if (to.meta.requiresAuth && !auth.isLoggedIn()) {
+    return { name: "login" };
   }
 
-  // 3) jeśli guestOnly (login/register) i już jest token -> dashboard
-  if (to.meta.guestOnly && hasToken) {
-    return "/dashboard";
+  if (to.meta.guestOnly && auth.isLoggedIn()) {
+    return { name: "dashboard" };
   }
-
-  return true;
 });
 
 export default router;

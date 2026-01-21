@@ -1,41 +1,38 @@
 <template>
-    <div class="max-w-md mx-auto bg-slate-900/40 border border-slate-800 rounded-2xl p-6">
-      <h1 class="text-2xl font-semibold">Login</h1>
-      <p class="text-slate-400 mt-1">Zaloguj się, żeby korzystać z aplikacji.</p>
+    <div class="max-w-md">
+      <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-6">
+        <h1 class="text-2xl font-semibold">Login</h1>
+        <p class="text-slate-400 mt-1">Zaloguj się do aplikacji.</p>
   
-      <form class="mt-6 space-y-4" @submit.prevent="submit">
-        <div>
-          <label class="text-sm text-slate-300">Email</label>
-          <input v-model="email" type="email"
-            class="mt-1 w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 outline-none focus:ring-2 focus:ring-slate-500" />
-        </div>
+        <form class="mt-6 space-y-4" @submit.prevent="submit">
+          <div>
+            <label class="text-sm text-slate-300">Email</label>
+            <input v-model="email" type="email" class="mt-1 w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 outline-none" />
+          </div>
   
-        <div>
-          <label class="text-sm text-slate-300">Hasło</label>
-          <input v-model="password" type="password"
-            class="mt-1 w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 outline-none focus:ring-2 focus:ring-slate-500" />
-        </div>
+          <div>
+            <label class="text-sm text-slate-300">Hasło</label>
+            <input v-model="password" type="password" class="mt-1 w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 outline-none" />
+          </div>
   
-        <p v-if="error" class="text-sm text-red-400">{{ error }}</p>
+          <p v-if="error" class="text-sm text-red-400">{{ error }}</p>
   
-        <button class="w-full rounded-xl bg-slate-200 text-slate-950 py-2 font-semibold hover:bg-white">
-          Zaloguj
-        </button>
-  
-        <p class="text-sm text-slate-400">
-          Nie masz konta?
-          <router-link class="text-slate-200 underline" to="/register">Zarejestruj</router-link>
-        </p>
-      </form>
+          <button class="w-full rounded-xl bg-slate-200 text-slate-900 py-2 font-medium hover:opacity-90">
+            Zaloguj
+          </button>
+        </form>
+      </div>
     </div>
   </template>
   
   <script setup>
   import { ref } from "vue";
   import { useRouter } from "vue-router";
-  import { login } from "../services/api";
+  import { useAuth } from "../composables/useAuth";
   
   const router = useRouter();
+  const auth = useAuth();
+  
   const email = ref("");
   const password = ref("");
   const error = ref("");
@@ -43,13 +40,10 @@
   async function submit() {
     error.value = "";
     try {
-      await login(email.value, password.value);
-      router.push("/dashboard");
+      await auth.login(email.value, password.value);
+      router.push({ name: "dashboard" });
     } catch (e) {
-      error.value =
-        e?.response?.data?.message ||
-        e?.response?.data?.errors?.email?.[0] ||
-        "Nie udało się zalogować.";
+      error.value = e?.response?.data?.message ?? e?.message ?? "Błąd logowania";
     }
   }
   </script>
