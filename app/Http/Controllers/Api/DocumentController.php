@@ -26,18 +26,21 @@ class DocumentController extends Controller
             'file' => ['required', 'file', 'max:20480', 'mimes:jpg,jpeg,png,webp,pdf'],
             'title' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
-
-            // category: vehicles / devices / general
+    
+            // vehicles | devices | general
             'category' => ['required', Rule::in(['vehicles', 'devices', 'general'])],
-
-            // IDki pod przypięcie (opcjonalne na poziomie typów)
+    
             'vehicle_id' => ['nullable', 'integer'],
-            'device_id' => ['nullable', 'integer'],
+            'device_id'  => ['nullable', 'integer'],
         ]);
-
+    
         $user = $request->user();
-
-        // WYMUSZENIE: tylko jedna opcja (vehicle / device / general)
+    
+        /*
+         |--------------------------------------------------
+         | Wymuszenie spójności category <-> ID
+         |--------------------------------------------------
+         */
         if ($data['category'] === 'vehicles') {
             if (empty($data['vehicle_id']) || !empty($data['device_id'])) {
                 return response()->json([
@@ -45,7 +48,7 @@ class DocumentController extends Controller
                 ], 422);
             }
         }
-
+    
         if ($data['category'] === 'devices') {
             if (empty($data['device_id']) || !empty($data['vehicle_id'])) {
                 return response()->json([
@@ -53,61 +56,53 @@ class DocumentController extends Controller
                 ], 422);
             }
         }
-
+    
         if ($data['category'] === 'general') {
-            if (!empty($data['device_id']) || !empty($data['vehicle_id'])) {
+            if (!empty($data['vehicle_id']) || !empty($data['device_id'])) {
                 return response()->json([
                     'message' => 'Dla category=general vehicle_id i device_id muszą być puste.'
                 ], 422);
             }
         }
-
-        // Opcjonalnie: sprawdzenie czy vehicle/device należy do usera (bez tego ktoś mógłby przypiąć do cudzego ID)
-        if ($data['category'] === 'vehicles') {
-            $vehicle = Vehicle::where('id', $data['vehicle_id'])->where('user_id', $user->id)->first();
-            if (!$vehicle) {
-                return response()->json(['message' => 'Nie znaleziono pojazdu dla tego użytkownika.'], 404);
-            }
-        }
-
-        if ($data['category'] === 'devices') {
-            $device = Device::where('id', $data['device_id'])->where('user_id', $user->id)->first();
-            if (!$device) {
-                return response()->json(['message' => 'Nie znaleziono urządzenia dla tego użytkownika.'], 404);
-            }
-        }
-
+    
+        /*
+         |--------------------------------------------------
+         | Upload pliku
+         |--------------------------------------------------
+         */
         $file = $data['file'];
-
-        // Zapis pliku (storage/app/documents/{user_id}/...)
-        $path = $file->store('documents/' . $user->id, 'local');
-
+        $path = $file->store('documents', 'public');
+    
         $document = Document::create([
-            'user_id' => $user->id,
-            'title' => $data['title'] ?? null,
-            'notes' => $data['notes'] ?? null,
+            'user_id'       => $user->id,
+            'title'         => $data['title'] ?? $file->getClientOriginalName(),
+            'notes'         => $data['notes'] ?? null,
             'original_name' => $file->getClientOriginalName(),
-            'path' => $path,
-            'mime_type' => $file->getMimeType(),
-            'size' => $file->getSize(),
+            'path'          => $path,
+            'mime_type'     => $file->getMimeType(),
+            'size'          => $file->getSize(),
         ]);
-
-        // Powiązanie tylko jeśli vehicles/devices
+    
+        /*
+         |--------------------------------------------------
+         | Przypięcie (opcjonalne)
+         |--------------------------------------------------
+         */
         if ($data['category'] === 'vehicles') {
-            Documentable::create([
-                'document_id' => $document->id,
-                'documentable_type' => Vehicle::class,
-                'documentable_id' => $data['vehicle_id'],
-            ]);
-        } elseif ($data['category'] === 'devices') {
-            Documentable::create([
-                'document_id' => $document->id,
-                'documentable_type' => Device::class,
-                'documentable_id' => $data['device_id'],
+            $document->documentables()->create([
+                'documentable_type' => \App\Models\Vehicle::class,
+                'documentable_id'   => $data['vehicle_id'],
             ]);
         }
-
-        return response()->json($document, 201);
+    
+        if ($data['category'] === 'devices') {
+            $document->documentables()->create([
+                'documentable_type' => \App\Models\Device::class,
+                'documentable_id'   => $data['device_id'],
+            ]);
+        }
+    
+        return response()->json($document->load('documentables'), 201);
     }
 
     public function download(Document $document, Request $request)
