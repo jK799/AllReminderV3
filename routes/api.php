@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DeviceController;
 use App\Http\Controllers\Api\VehicleController;
+use App\Http\Controllers\Api\ReminderController;
 
 Route::get('/ping', fn () => response()->json(['ok' => true]));
 
@@ -11,4 +12,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('devices', DeviceController::class);
     Route::apiResource('vehicles', VehicleController::class);
+    Route::apiResource('reminders', ReminderController::class);
 });

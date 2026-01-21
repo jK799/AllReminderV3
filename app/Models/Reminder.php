@@ -4,31 +4,31 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Reminder extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
         'title',
         'description',
-        'due_at',
-        'completed_at',
-        'is_active',
-        'device_id',
-        'vehicle_id',
+        'remind_at',
+        'user_id',
+        'remindable_type',
+        'remindable_id',
     ];
 
     protected $casts = [
-        'due_at' => 'datetime',
-        'completed_at' => 'datetime',
-        'is_active' => 'boolean',
+        'remind_at' => 'datetime',
     ];
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function remindable()
+    {
+        return $this->morphTo();
     }
 }
