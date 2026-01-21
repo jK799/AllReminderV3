@@ -1,33 +1,26 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center p-6">
-      <div class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-6">
-        <h1 class="text-xl font-semibold">Logowanie</h1>
-        <p class="text-sm text-gray-400 mt-1">Zaloguj się, aby przejść do dokumentów.</p>
+    <div class="max-w-md mx-auto">
+      <h1 class="text-2xl font-semibold mb-6">Logowanie</h1>
   
-        <div class="mt-6 space-y-3">
-          <input
-            v-model="email"
-            type="email"
-            placeholder="Email"
-            class="w-full px-4 py-3 rounded-xl bg-gray-950 border border-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          />
-          <input
-            v-model="password"
-            type="password"
-            placeholder="Hasło"
-            class="w-full px-4 py-3 rounded-xl bg-gray-950 border border-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-600"
-          />
-  
-          <button
-            @click="submit"
-            :disabled="loading"
-            class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 font-medium"
-          >
-            {{ loading ? "Logowanie..." : "Zaloguj" }}
-          </button>
-  
-          <p v-if="error" class="text-sm text-red-400">{{ error }}</p>
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
+        <div>
+          <label class="block text-sm text-zinc-300 mb-1">E-mail</label>
+          <input v-model="email" type="email"
+            class="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-600" />
         </div>
+  
+        <div>
+          <label class="block text-sm text-zinc-300 mb-1">Hasło</label>
+          <input v-model="password" type="password"
+            class="w-full px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-600" />
+        </div>
+  
+        <button @click="login" :disabled="loading"
+          class="w-full px-4 py-2 rounded-lg bg-white text-zinc-900 font-medium hover:bg-zinc-200 disabled:opacity-60">
+          {{ loading ? "Logowanie..." : "Zaloguj" }}
+        </button>
+  
+        <p v-if="error" class="text-sm text-red-400">{{ error }}</p>
       </div>
     </div>
   </template>
@@ -35,7 +28,7 @@
   <script setup>
   import { ref } from "vue";
   import { useRouter } from "vue-router";
-  import api from "../lib/api";
+  import { apiFetch, setToken } from "../api";
   
   const router = useRouter();
   const email = ref("");
@@ -43,23 +36,24 @@
   const loading = ref(false);
   const error = ref("");
   
-  async function submit() {
+  async function login() {
     error.value = "";
     loading.value = true;
   
     try {
-      const res = await api.post("/api/login", {
-        email: email.value,
-        password: password.value,
+      const res = await apiFetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.value, password: password.value }),
       });
   
-      const token = res?.data?.token;
-      if (!token) throw new Error("Brak tokena w odpowiedzi.");
+      const token = res?.token; // <- jeśli masz inne pole, podmienimy
+      if (!token) throw new Error("Brak tokena w odpowiedzi z /api/login");
   
-      localStorage.setItem("token", token);
-      await router.push({ name: "documents" });
+      setToken(token);
+      router.push("/documents");
     } catch (e) {
-      error.value = e?.response?.data?.message ?? e?.message ?? "Błąd logowania";
+      error.value = e.message || "Błąd logowania";
     } finally {
       loading.value = false;
     }
