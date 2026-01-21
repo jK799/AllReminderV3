@@ -83,11 +83,6 @@ class DocumentController extends Controller
             'size'          => $file->getSize(),
         ]);
     
-        /*
-         |--------------------------------------------------
-         | Przypięcie (opcjonalne)
-         |--------------------------------------------------
-         */
         if ($data['category'] === 'vehicles') {
             $document->documentables()->create([
                 'documentable_type' => \App\Models\Vehicle::class,
