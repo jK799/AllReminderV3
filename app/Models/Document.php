@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Document extends Model
 {
@@ -21,16 +19,12 @@ class Document extends Model
         'size',
     ];
 
-    protected $casts = [
-        'size' => 'integer',
-    ];
-
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function documentables(): HasMany
+    public function documentables()
     {
         return $this->hasMany(Documentable::class);
     }
