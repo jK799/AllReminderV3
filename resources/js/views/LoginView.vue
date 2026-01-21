@@ -6,12 +6,14 @@
       <form class="mt-6 space-y-4" @submit.prevent="submit">
         <div>
           <label class="text-sm text-slate-300">Email</label>
-          <input v-model="email" type="email" class="mt-1 w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 outline-none focus:ring-2 focus:ring-slate-500" />
+          <input v-model="email" type="email"
+            class="mt-1 w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 outline-none focus:ring-2 focus:ring-slate-500" />
         </div>
   
         <div>
           <label class="text-sm text-slate-300">Hasło</label>
-          <input v-model="password" type="password" class="mt-1 w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 outline-none focus:ring-2 focus:ring-slate-500" />
+          <input v-model="password" type="password"
+            class="mt-1 w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 outline-none focus:ring-2 focus:ring-slate-500" />
         </div>
   
         <p v-if="error" class="text-sm text-red-400">{{ error }}</p>
@@ -31,7 +33,7 @@
   <script setup>
   import { ref } from "vue";
   import { useRouter } from "vue-router";
-  import api, { setToken } from "../services/api";
+  import { login } from "../services/api";
   
   const router = useRouter();
   const email = ref("");
@@ -41,12 +43,7 @@
   async function submit() {
     error.value = "";
     try {
-      const res = await api.post("/api/login", {
-        email: email.value,
-        password: password.value,
-      });
-  
-      setToken(res.data.token);
+      await login(email.value, password.value);
       router.push("/dashboard");
     } catch (e) {
       error.value =
