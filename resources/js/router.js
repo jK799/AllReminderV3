@@ -10,6 +10,10 @@ import RegisterView from "./views/RegisterView.vue";
 import VehicleDetailView from "./views/VehicleDetailView.vue";
 import DeviceDetailView from "./views/DeviceDetailView.vue";
 
+import NewVehicleView from "./views/NewVehicleView.vue";
+import NewDeviceView from "./views/NewDeviceView.vue";
+
+
 const routes = [
   { path: "/", redirect: "/dashboard" },
 
@@ -22,6 +26,10 @@ const routes = [
 
   { path: "/vehicles/:id", component: VehicleDetailView, meta: { requiresAuth: true }, name: "vehicle.show" },
   { path: "/devices/:id", component: DeviceDetailView, meta: { requiresAuth: true }, name: "device.show" },
+
+  { path: "/vehicles/new", component: NewVehicleView, meta: { requiresAuth: true } },
+{ path: "/devices/new", component: NewDeviceView, meta: { requiresAuth: true } },
+
 ];
 
 const router = createRouter({
