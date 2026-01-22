@@ -1,268 +1,254 @@
 <template>
-  <div class="space-y-6">
-    <!-- TOP: nagłówek -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Dashboard</div>
-          <div class="card-subtitle">Przegląd statystyk i skrótów.</div>
-        </div>
+  <div class="space-y-8">
+    <!-- HEADER -->
+    <section class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight">Dashboard</h1>
+        <p class="text-slate-400 mt-1">Przegląd statystyk i skrótów.</p>
+      </div>
 
+      <div class="flex gap-2">
         <button class="btn" @click="refresh" :disabled="loading">
           {{ loading ? "Ładuje..." : "Odśwież" }}
         </button>
+        <RouterLink class="btn btn-soft" to="/upload">+ Upload</RouterLink>
       </div>
+    </section>
 
-      <div v-if="error" class="card-body">
-        <div class="text-red-300 text-sm">
-          {{ error }}
-        </div>
-      </div>
-    </div>
-
-    <!-- STATY -->
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="card">
-        <div class="card-body">
-          <div class="text-slate-400 text-sm">Pojazdy</div>
-          <div class="text-2xl font-semibold mt-1">{{ stats.vehicles }}</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-body">
-          <div class="text-slate-400 text-sm">Urządzenia</div>
-          <div class="text-2xl font-semibold mt-1">{{ stats.devices }}</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-body">
-          <div class="text-slate-400 text-sm">Przypomnienia aktywne</div>
-          <div class="text-2xl font-semibold mt-1">{{ stats.activeReminders }}</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-body">
-          <div class="text-slate-400 text-sm">Dokumenty</div>
-          <div class="text-2xl font-semibold mt-1">{{ stats.documents }}</div>
-        </div>
+    <div v-if="error" class="card border-red-500/20 bg-red-500/5">
+      <div class="card-body text-sm text-red-200">
+        {{ error }}
       </div>
     </div>
 
-    <!-- DWIE KOLUMNY -->
-    <div class="grid gap-4 lg:grid-cols-2">
-      <!-- PRZYPOMNIENIA -->
+    <!-- STATS -->
+    <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <StatCard label="Pojazdy" :value="stats.vehicles" icon="🚗" />
+      <StatCard label="Urządzenia" :value="stats.devices" icon="🛠️" />
+      <StatCard label="Przypomnienia aktywne" :value="stats.activeReminders" icon="⏰" />
+      <StatCard label="Dokumenty" :value="stats.documents" icon="📄" />
+    </section>
+
+    <!-- MAIN GRID -->
+    <section class="grid gap-6 lg:grid-cols-2">
+      <!-- REMINDERS -->
       <div class="card">
-        <div class="card-header">
+        <div class="card-head">
           <div>
-            <div class="card-title">Najbliższe przypomnienia</div>
-            <div class="card-subtitle">Sortowane po terminie</div>
+            <h2 class="card-title">Najbliższe przypomnienia</h2>
+            <p class="card-subtitle">Sortowane po terminie</p>
           </div>
           <span class="pill">{{ nearestReminders.length }}</span>
         </div>
 
         <div class="card-body">
-          <div v-if="nearestReminders.length === 0" class="text-slate-400 text-sm">
-            Brak przypomnień.
+          <EmptyState v-if="nearestReminders.length === 0" text="Brak przypomnień." />
+
+          <div v-else class="space-y-3">
+            <div v-for="r in nearestReminders" :key="r.id" class="item">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="font-semibold truncate">{{ r.title }}</div>
+                  <div class="text-sm text-slate-400 truncate">{{ r.description || "—" }}</div>
+                </div>
+
+                <span class="badge" :class="r.is_active ? 'badge-ok' : 'badge-off'">
+                  {{ r.is_active ? "Aktywne" : "Nieaktywne" }}
+                </span>
+              </div>
+
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <span class="tag tag-soft">⏰ {{ formatDateTime(r.due_at || r.remind_at) }}</span>
+
+                <span v-if="r.vehicle_id" class="tag">
+                  🚗
+                  <RouterLink class="link" :to="{ name: 'vehicle.show', params: { id: r.vehicle_id } }">
+                    {{ vehicleName(r.vehicle_id) }}
+                  </RouterLink>
+                </span>
+
+                <span v-else-if="r.device_id" class="tag">
+                  🛠️
+                  <RouterLink class="link" :to="{ name: 'device.show', params: { id: r.device_id } }">
+                    {{ deviceName(r.device_id) }}
+                  </RouterLink>
+                </span>
+
+                <span v-else class="tag">📌 Ogólne</span>
+              </div>
+            </div>
           </div>
-
-          <ul v-else class="divide-y divide-slate-800/60">
-            <li v-for="r in nearestReminders" :key="r.id" class="py-3 flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <div class="font-semibold truncate">{{ r.title }}</div>
-                <div class="text-sm text-slate-400 truncate">
-                  {{ r.description || "—" }}
-                </div>
-
-                <div class="mt-2 flex flex-wrap items-center gap-2">
-                  <span class="tag" v-if="r.vehicle_id">
-                    
-                    <RouterLink
-                      class="underline underline-offset-2 hover:text-white"
-                      :to="{ name: 'vehicle.show', params: { id: r.vehicle_id } }"
-                    >
-                      {{ vehicleName(r.vehicle_id) }}
-                    </RouterLink>
-                  </span>
-
-                  <span class="tag" v-else-if="r.device_id">
-                    🔧
-                    <RouterLink
-                      class="underline underline-offset-2 hover:text-white"
-                      :to="{ name: 'device.show', params: { id: r.device_id } }"
-                    >
-                      {{ deviceName(r.device_id) }}
-                    </RouterLink>
-                  </span>
-
-                  <span class="tag" v-else>
-                    
-                  </span>
-
-                  <span class="tag tag-soft">
-                    ⏰ {{ formatDateTime(r.due_at || r.remind_at) }}
-                  </span>
-                </div>
-              </div>
-
-              <div class="text-xs text-slate-400 shrink-0">
-                {{ r.is_active ? "Aktywne" : "Nieaktywne" }}
-              </div>
-            </li>
-          </ul>
         </div>
       </div>
 
-      <!-- SERWISY -->
+      <!-- SERVICES -->
       <div class="card">
-        <div class="card-header">
+        <div class="card-head">
           <div>
-            <div class="card-title">Najbliższe serwisy</div>
-            <div class="card-subtitle">Po dacie next_due_at</div>
+            <h2 class="card-title">Najbliższe serwisy</h2>
+            <p class="card-subtitle">Po dacie next_due_at</p>
           </div>
           <span class="pill">{{ nearestServices.length }}</span>
         </div>
 
         <div class="card-body">
-          <div v-if="nearestServices.length === 0" class="text-slate-400 text-sm">
-            Brak serwisów.
+          <EmptyState v-if="nearestServices.length === 0" text="Brak serwisów." />
+
+          <div v-else class="space-y-3">
+            <div v-for="s in nearestServices" :key="s.id" class="item">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="font-semibold truncate">{{ s.title }}</div>
+                  <div class="text-sm text-slate-400 truncate">{{ s.description || "—" }}</div>
+                </div>
+
+                <span class="badge" :class="s.is_active ? 'badge-ok' : 'badge-off'">
+                  {{ s.is_active ? "Aktywne" : "Nieaktywne" }}
+                </span>
+              </div>
+
+              <div class="mt-3 flex flex-wrap items-center gap-2">
+                <span class="tag tag-soft">📅 {{ formatDate(s.next_due_at) }}</span>
+
+                <span v-if="s.vehicle_id" class="tag">
+                  🚗
+                  <RouterLink class="link" :to="{ name: 'vehicle.show', params: { id: s.vehicle_id } }">
+                    {{ vehicleName(s.vehicle_id) }}
+                  </RouterLink>
+                </span>
+
+                <span v-else-if="s.device_id" class="tag">
+                  🛠️
+                  <RouterLink class="link" :to="{ name: 'device.show', params: { id: s.device_id } }">
+                    {{ deviceName(s.device_id) }}
+                  </RouterLink>
+                </span>
+
+                <span v-else class="tag">📌 Ogólne</span>
+              </div>
+            </div>
           </div>
-
-          <ul v-else class="divide-y divide-slate-800/60">
-            <li v-for="s in nearestServices" :key="s.id" class="py-3 flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <div class="font-semibold truncate">{{ s.title }}</div>
-                <div class="text-sm text-slate-400 truncate">
-                  {{ s.description || "—" }}
-                </div>
-
-                <div class="mt-2 flex flex-wrap items-center gap-2">
-                  <span class="tag" v-if="s.vehicle_id">
-                    
-                    <RouterLink
-                      class="underline underline-offset-2 hover:text-white"
-                      :to="{ name: 'vehicle.show', params: { id: s.vehicle_id } }"
-                    >
-                      {{ vehicleName(s.vehicle_id) }}
-                    </RouterLink>
-                  </span>
-
-                  <span class="tag" v-else-if="s.device_id">
-                    🔧
-                    <RouterLink
-                      class="underline underline-offset-2 hover:text-white"
-                      :to="{ name: 'device.show', params: { id: s.device_id } }"
-                    >
-                      {{ deviceName(s.device_id) }}
-                    </RouterLink>
-                  </span>
-
-                  <span class="tag" v-else>
-                    
-                  </span>
-
-                  <span class="tag tag-soft">
-                    📅 {{ formatDate(s.next_due_at) }}
-                  </span>
-                </div>
-              </div>
-
-              <div class="text-xs text-slate-400 shrink-0">
-                {{ s.is_active ? "Aktywne" : "Nieaktywne" }}
-              </div>
-            </li>
-          </ul>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- LISTY: POJAZDY + URZĄDZENIA -->
-    <div class="grid gap-4 lg:grid-cols-2">
-      <!-- POJAZDY -->
+    <!-- LISTS -->
+    <section class="grid gap-6 lg:grid-cols-2">
+      <!-- VEHICLES -->
       <div class="card">
-        <div class="card-header">
+        <div class="card-head">
           <div>
-            <div class="card-title">Pojazdy</div>
-            <div class="card-subtitle">Kliknij aby wejść w szczegóły</div>
+            <h2 class="card-title">Pojazdy</h2>
+            <p class="card-subtitle">Kliknij aby wejść w szczegóły</p>
           </div>
           <span class="pill">{{ vehicles.length }}</span>
         </div>
 
         <div class="card-body">
-          <div v-if="vehicles.length === 0" class="text-slate-400 text-sm">
-            Brak pojazdów
+          <EmptyState v-if="vehicles.length === 0" text="Brak pojazdów." />
+
+          <div v-else class="grid gap-2">
+            <RouterLink
+              v-for="v in vehicles"
+              :key="v.id"
+              class="row"
+              :to="{ name: 'vehicle.show', params: { id: v.id } }"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="icon">🚗</div>
+                <div class="min-w-0">
+                  <div class="font-medium truncate">{{ v.name }}</div>
+                  <div class="text-xs text-slate-400 truncate">
+                    {{ [v.brand, v.model].filter(Boolean).join(" ") || "—" }}
+                  </div>
+                </div>
+              </div>
+              <div class="text-xs text-slate-400">{{ v.plate || "" }}</div>
+            </RouterLink>
           </div>
-
-          <ul v-else class="divide-y divide-slate-800/60">
-            <li v-for="v in vehicles" :key="v.id" class="py-2 flex items-center justify-between gap-3">
-              <RouterLink
-                class="font-medium hover:underline underline-offset-2 truncate"
-                :to="{ name: 'vehicle.show', params: { id: v.id } }"
-              >
-                {{ v.name }}
-              </RouterLink>
-
-              <span class="text-sm text-slate-400 shrink-0 truncate">
-                {{ [v.brand, v.model].filter(Boolean).join(" ") }}
-              </span>
-            </li>
-          </ul>
         </div>
       </div>
 
-      <!-- URZĄDZENIA -->
+      <!-- DEVICES -->
       <div class="card">
-        <div class="card-header">
+        <div class="card-head">
           <div>
-            <div class="card-title">Urządzenia</div>
-            <div class="card-subtitle">Kliknij aby wejść w dokumenty</div>
+            <h2 class="card-title">Urządzenia</h2>
+            <p class="card-subtitle">Kliknij aby wejść w dokumenty</p>
           </div>
           <span class="pill">{{ devices.length }}</span>
         </div>
 
         <div class="card-body">
-          <div v-if="devices.length === 0" class="text-slate-400 text-sm">
-            Brak urządzeń
+          <EmptyState v-if="devices.length === 0" text="Brak urządzeń." />
+
+          <div v-else class="grid gap-2">
+            <RouterLink
+              v-for="d in devices"
+              :key="d.id"
+              class="row"
+              :to="{ name: 'device.show', params: { id: d.id } }"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="icon">🛠️</div>
+                <div class="min-w-0">
+                  <div class="font-medium truncate">{{ d.name }}</div>
+                  <div class="text-xs text-slate-400 truncate">{{ d.type || "urządzenie" }}</div>
+                </div>
+              </div>
+              <div class="text-xs text-slate-400">ID: {{ d.id }}</div>
+            </RouterLink>
           </div>
-
-          <ul v-else class="divide-y divide-slate-800/60">
-            <li v-for="d in devices" :key="d.id" class="py-2 flex items-center justify-between gap-3">
-              <RouterLink
-                class="font-medium hover:underline underline-offset-2 truncate"
-                :to="{ name: 'device.show', params: { id: d.id } }"
-              >
-                {{ d.name }}
-              </RouterLink>
-
-              <span class="text-sm text-slate-400 shrink-0 truncate">
-                {{ d.type || "urządzenie" }}
-              </span>
-            </li>
-          </ul>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- CTA -->
-    <div class="card">
-      <div class="card-body flex flex-wrap gap-3 items-center justify-between">
-        <div class="text-sm text-slate-300">
-          Szybkie akcje:
+    <!-- FOOT ACTIONS -->
+    <section class="card">
+      <div class="card-body flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div class="font-semibold">Szybkie akcje</div>
+          <div class="text-sm text-slate-400">Najczęściej używane skróty.</div>
         </div>
         <div class="flex gap-2">
+          <RouterLink class="btn btn-soft" to="/documents">Lista dokumentów</RouterLink>
           <RouterLink class="btn" to="/upload">Upload dokumentu</RouterLink>
-          <RouterLink class="btn" to="/documents">Lista dokumentów</RouterLink>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref, computed, reactive } from "vue";
 import api from "../services/api";
+
+// --- mini komponenty lokalne (bez osobnych plików, mniej roboty) ---
+const StatCard = {
+  props: { label: String, value: [String, Number], icon: String },
+  template: `
+    <div class="card">
+      <div class="card-body flex items-center justify-between">
+        <div>
+          <div class="text-slate-400 text-sm">{{ label }}</div>
+          <div class="text-3xl font-semibold mt-1">{{ value }}</div>
+        </div>
+        <div class="h-10 w-10 rounded-2xl bg-white/5 border border-slate-800/60 flex items-center justify-center text-lg">
+          {{ icon }}
+        </div>
+      </div>
+    </div>
+  `,
+};
+
+const EmptyState = {
+  props: { text: String },
+  template: `
+    <div class="rounded-2xl border border-slate-800/60 bg-white/5 px-4 py-4 text-sm text-slate-400">
+      {{ text }}
+    </div>
+  `,
+};
 
 const loading = ref(false);
 const error = ref("");
@@ -290,14 +276,9 @@ async function fetchList(url) {
 
 async function fetchCount(url) {
   const res = await api.get(url);
-  // jeśli API zwraca listę -> policz
   const arr = safeArray(res.data);
   if (Array.isArray(arr)) return arr.length;
-
-  // jeśli API zwraca {count: X}
   if (typeof res.data?.count === "number") return res.data.count;
-
-  // fallback:
   return 0;
 }
 
@@ -320,41 +301,35 @@ function formatDate(x) {
 }
 
 function vehicleName(id) {
-  if (!id) return null;
   const v = vehicles.value.find((x) => x.id === id);
   return v?.name || `Pojazd #${id}`;
 }
 
 function deviceName(id) {
-  if (!id) return null;
   const d = devices.value.find((x) => x.id === id);
   return d?.name || `Urządzenie #${id}`;
 }
 
 const nearestReminders = computed(() => {
-  const list = [...reminders.value]
+  return [...reminders.value]
     .filter((r) => r && (r.is_active === 1 || r.is_active === true))
     .sort((a, b) => {
       const da = parseDateTime(a.due_at || a.remind_at)?.getTime() ?? Infinity;
       const db = parseDateTime(b.due_at || b.remind_at)?.getTime() ?? Infinity;
       return da - db;
     })
-    .slice(0, 6);
-
-  return list;
+    .slice(0, 5);
 });
 
 const nearestServices = computed(() => {
-  const list = [...services.value]
+  return [...services.value]
     .filter((s) => s && (s.is_active === 1 || s.is_active === true))
     .sort((a, b) => {
       const da = parseDateTime(a.next_due_at)?.getTime() ?? Infinity;
       const db = parseDateTime(b.next_due_at)?.getTime() ?? Infinity;
       return da - db;
     })
-    .slice(0, 6);
-
-  return list;
+    .slice(0, 5);
 });
 
 async function refresh() {
@@ -362,30 +337,26 @@ async function refresh() {
   error.value = "";
 
   try {
-    const [
-      devicesList,
-      vehiclesList,
-      docsCount,
-      remindersList,
-      servicesList,
-    ] = await Promise.all([
-      fetchList("/api/devices"),
-      fetchList("/api/vehicles"),
-      fetchCount("/api/documents"),
-      fetchList("/api/reminders"),
-      fetchList("/api/services"),
-    ]);
+    const [devicesList, vehiclesList, docsCount, remindersList, servicesList] =
+      await Promise.all([
+        fetchList("/api/devices"),
+        fetchList("/api/vehicles"),
+        fetchCount("/api/documents"),
+        fetchList("/api/reminders"),
+        fetchList("/api/services"),
+      ]);
 
     devices.value = devicesList;
     vehicles.value = vehiclesList;
-
     reminders.value = remindersList;
     services.value = servicesList;
 
     stats.devices = devicesList.length;
     stats.vehicles = vehiclesList.length;
     stats.documents = docsCount;
-    stats.activeReminders = remindersList.filter((r) => r && (r.is_active === 1 || r.is_active === true)).length;
+    stats.activeReminders = remindersList.filter(
+      (r) => r && (r.is_active === 1 || r.is_active === true)
+    ).length;
   } catch (e) {
     error.value =
       e?.response?.data?.message ||
@@ -398,3 +369,69 @@ async function refresh() {
 
 onMounted(refresh);
 </script>
+
+<style scoped>
+/* bazowe karty */
+.card {
+  @apply rounded-3xl border border-slate-800/60 bg-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.25)];
+}
+.card-head {
+  @apply px-6 py-5 border-b border-slate-800/60 flex items-start justify-between gap-3;
+}
+.card-title {
+  @apply text-lg font-semibold tracking-tight;
+}
+.card-subtitle {
+  @apply text-sm text-slate-400 mt-1;
+}
+.card-body {
+  @apply px-6 py-5;
+}
+
+/* guziki */
+.btn {
+  @apply px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/15 border border-slate-800/60 transition text-sm font-medium;
+}
+.btn-soft {
+  @apply bg-white/5 hover:bg-white/10;
+}
+.btn-danger {
+  @apply bg-red-500/10 hover:bg-red-500/15 border-red-500/20;
+}
+
+/* małe elementy */
+.pill {
+  @apply px-2.5 py-1 rounded-xl bg-white/5 border border-slate-800/60 text-xs text-slate-300;
+}
+.badge {
+  @apply px-2.5 py-1 rounded-xl text-xs border;
+}
+.badge-ok {
+  @apply bg-emerald-500/10 border-emerald-500/20 text-emerald-200;
+}
+.badge-off {
+  @apply bg-slate-500/10 border-slate-500/20 text-slate-300;
+}
+
+.item {
+  @apply rounded-2xl border border-slate-800/60 bg-slate-950/40 px-4 py-4;
+}
+
+.tag {
+  @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 border border-slate-800/60 text-xs text-slate-200;
+}
+.tag-soft {
+  @apply text-slate-300;
+}
+.link {
+  @apply underline underline-offset-2 hover:text-white;
+}
+
+/* list row cards */
+.row {
+  @apply flex items-center justify-between gap-3 rounded-2xl border border-slate-800/60 bg-slate-950/40 px-4 py-3 hover:bg-white/5 transition;
+}
+.icon {
+  @apply h-9 w-9 rounded-2xl bg-white/5 border border-slate-800/60 flex items-center justify-center;
+}
+</style>
