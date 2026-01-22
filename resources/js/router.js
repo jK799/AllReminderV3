@@ -7,15 +7,21 @@ import UploadView from "./views/UploadView.vue";
 import LoginView from "./views/LoginView.vue";
 import RegisterView from "./views/RegisterView.vue";
 
+import VehicleDetailView from "./views/VehicleDetailView.vue";
+import DeviceDetailView from "./views/DeviceDetailView.vue";
+
 const routes = [
   { path: "/", redirect: "/dashboard" },
 
-  { path: "/login", component: LoginView, meta: { guestOnly: true } },
-  { path: "/register", component: RegisterView, meta: { guestOnly: true } },
+  { path: "/login", component: LoginView, meta: { guestOnly: true }, name: "login" },
+  { path: "/register", component: RegisterView, meta: { guestOnly: true }, name: "register" },
 
-  { path: "/dashboard", component: DashboardView, meta: { requiresAuth: true } },
-  { path: "/documents", component: DocumentsView, meta: { requiresAuth: true } },
-  { path: "/upload", component: UploadView, meta: { requiresAuth: true } },
+  { path: "/dashboard", component: DashboardView, meta: { requiresAuth: true }, name: "dashboard" },
+  { path: "/documents", component: DocumentsView, meta: { requiresAuth: true }, name: "documents" },
+  { path: "/upload", component: UploadView, meta: { requiresAuth: true }, name: "upload" },
+
+  { path: "/vehicles/:id", component: VehicleDetailView, meta: { requiresAuth: true }, name: "vehicle.show" },
+  { path: "/devices/:id", component: DeviceDetailView, meta: { requiresAuth: true }, name: "device.show" },
 ];
 
 const router = createRouter({

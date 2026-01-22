@@ -1,136 +1,259 @@
 <template>
   <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-start justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p class="text-slate-400 mt-1">
-          Podgląd statystyk i najbliższych terminów.
-        </p>
-      </div>
+    <!-- TOP: nagłówek -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Dashboard</div>
+          <div class="card-subtitle">Przegląd statystyk i skrótów.</div>
+        </div>
 
-      <div class="flex items-center gap-2">
         <button class="btn" @click="refresh" :disabled="loading">
-          {{ loading ? "Ładowanie..." : "Odśwież" }}
+          {{ loading ? "Ładuje..." : "Odśwież" }}
         </button>
       </div>
+
+      <div v-if="error" class="card-body">
+        <div class="text-red-300 text-sm">
+          {{ error }}
+        </div>
+      </div>
     </div>
 
-    <!-- Error -->
-    <div v-if="error" class="rounded-2xl border border-red-500/30 bg-red-500/10 p-4">
-      <div class="font-medium text-red-200">Błąd</div>
-      <div class="text-sm text-red-200/80 mt-1">{{ error }}</div>
-      <button class="btn btn-red mt-3" @click="refresh">Spróbuj ponownie</button>
+    <!-- STATY -->
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="text-slate-400 text-sm">Pojazdy</div>
+          <div class="text-2xl font-semibold mt-1">{{ stats.vehicles }}</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="text-slate-400 text-sm">Urządzenia</div>
+          <div class="text-2xl font-semibold mt-1">{{ stats.devices }}</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="text-slate-400 text-sm">Przypomnienia aktywne</div>
+          <div class="text-2xl font-semibold mt-1">{{ stats.activeReminders }}</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="text-slate-400 text-sm">Dokumenty</div>
+          <div class="text-2xl font-semibold mt-1">{{ stats.documents }}</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-      <StatCard title="Urządzenia" :value="stats.devices" :loading="loading" />
-      <StatCard title="Pojazdy" :value="stats.vehicles" :loading="loading" />
-      <StatCard title="Przypomnienia (aktywne)" :value="stats.remindersActive" :loading="loading" />
-      <StatCard title="Serwisy (aktywne)" :value="stats.servicesActive" :loading="loading" />
-      <StatCard title="Dokumenty" :value="stats.documents" :loading="loading" />
-    </div>
-
-    <!-- Lists -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Upcoming reminders -->
+    <!-- DWIE KOLUMNY -->
+    <div class="grid gap-4 lg:grid-cols-2">
+      <!-- PRZYPOMNIENIA -->
       <div class="card">
         <div class="card-header">
           <div>
             <div class="card-title">Najbliższe przypomnienia</div>
-            <div class="card-subtitle">Top 5, tylko aktywne i nieukończone</div>
+            <div class="card-subtitle">Sortowane po terminie</div>
           </div>
-          <span class="pill">{{ upcomingReminders.length }}</span>
+          <span class="pill">{{ nearestReminders.length }}</span>
         </div>
 
         <div class="card-body">
-          <div v-if="loading" class="text-slate-400 text-sm">Ładowanie…</div>
-
-          <div v-else-if="upcomingReminders.length === 0" class="text-slate-400 text-sm">
-            Brak nadchodzących przypomnień 🎉
+          <div v-if="nearestReminders.length === 0" class="text-slate-400 text-sm">
+            Brak przypomnień.
           </div>
 
           <ul v-else class="divide-y divide-slate-800/60">
-            <li v-for="r in upcomingReminders" :key="r.id" class="py-3 flex items-start justify-between gap-3">
+            <li v-for="r in nearestReminders" :key="r.id" class="py-3 flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <div class="font-medium truncate">
-                  {{ r.title || "Bez tytułu" }}
-                </div>
+                <div class="font-semibold truncate">{{ r.title }}</div>
                 <div class="text-sm text-slate-400 truncate">
-                  {{ r.description || "Brak opisu" }}
+                  {{ r.description || "—" }}
                 </div>
 
-                <div class="mt-2 flex flex-wrap gap-2">
-                  <span class="tag">
-                    Termin: {{ formatDateTime(getReminderDate(r)) }}
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                  <span class="tag" v-if="r.vehicle_id">
+                    
+                    <RouterLink
+                      class="underline underline-offset-2 hover:text-white"
+                      :to="{ name: 'vehicle.show', params: { id: r.vehicle_id } }"
+                    >
+                      {{ vehicleName(r.vehicle_id) }}
+                    </RouterLink>
                   </span>
 
-                  <span v-if="r.vehicle_id" class="tag">Pojazd #{{ r.vehicle_id }}</span>
-                  <span v-else-if="r.device_id" class="tag">Urządzenie #{{ r.device_id }}</span>
-                  <span v-else class="tag">Ogólne</span>
+                  <span class="tag" v-else-if="r.device_id">
+                    🔧
+                    <RouterLink
+                      class="underline underline-offset-2 hover:text-white"
+                      :to="{ name: 'device.show', params: { id: r.device_id } }"
+                    >
+                      {{ deviceName(r.device_id) }}
+                    </RouterLink>
+                  </span>
+
+                  <span class="tag" v-else>
+                    
+                  </span>
+
+                  <span class="tag tag-soft">
+                    ⏰ {{ formatDateTime(r.due_at || r.remind_at) }}
+                  </span>
                 </div>
               </div>
 
-              <div class="text-right shrink-0">
-                <div class="text-sm text-slate-300">
-                  {{ humanDiff(getReminderDate(r)) }}
-                </div>
+              <div class="text-xs text-slate-400 shrink-0">
+                {{ r.is_active ? "Aktywne" : "Nieaktywne" }}
               </div>
             </li>
           </ul>
         </div>
       </div>
 
-      <!-- Upcoming services -->
+      <!-- SERWISY -->
       <div class="card">
         <div class="card-header">
           <div>
             <div class="card-title">Najbliższe serwisy</div>
-            <div class="card-subtitle">Top 5, tylko aktywne</div>
+            <div class="card-subtitle">Po dacie next_due_at</div>
           </div>
-          <span class="pill">{{ upcomingServices.length }}</span>
+          <span class="pill">{{ nearestServices.length }}</span>
         </div>
 
         <div class="card-body">
-          <div v-if="loading" class="text-slate-400 text-sm">Ładowanie…</div>
-
-          <div v-else-if="upcomingServices.length === 0" class="text-slate-400 text-sm">
-            Brak nadchodzących serwisów.
+          <div v-if="nearestServices.length === 0" class="text-slate-400 text-sm">
+            Brak serwisów.
           </div>
 
           <ul v-else class="divide-y divide-slate-800/60">
-            <li v-for="s in upcomingServices" :key="s.id" class="py-3 flex items-start justify-between gap-3">
+            <li v-for="s in nearestServices" :key="s.id" class="py-3 flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <div class="font-medium truncate">
-                  {{ s.title || "Serwis" }}
-                </div>
+                <div class="font-semibold truncate">{{ s.title }}</div>
                 <div class="text-sm text-slate-400 truncate">
-                  {{ s.description || "Brak opisu" }}
+                  {{ s.description || "—" }}
                 </div>
 
-                <div class="mt-2 flex flex-wrap gap-2">
-                  <span class="tag">
-                    Następny termin: {{ formatDate(getServiceDate(s)) }}
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                  <span class="tag" v-if="s.vehicle_id">
+                    
+                    <RouterLink
+                      class="underline underline-offset-2 hover:text-white"
+                      :to="{ name: 'vehicle.show', params: { id: s.vehicle_id } }"
+                    >
+                      {{ vehicleName(s.vehicle_id) }}
+                    </RouterLink>
                   </span>
 
-                  <span v-if="s.vehicle_id" class="tag">Pojazd #{{ s.vehicle_id }}</span>
-                  <span v-else-if="s.device_id" class="tag">Urządzenie #{{ s.device_id }}</span>
-                  <span v-else class="tag">Ogólne</span>
+                  <span class="tag" v-else-if="s.device_id">
+                    🔧
+                    <RouterLink
+                      class="underline underline-offset-2 hover:text-white"
+                      :to="{ name: 'device.show', params: { id: s.device_id } }"
+                    >
+                      {{ deviceName(s.device_id) }}
+                    </RouterLink>
+                  </span>
 
-                  <span v-if="s.interval_value && s.interval_unit" class="tag">
-                    Co {{ s.interval_value }} {{ s.interval_unit }}
+                  <span class="tag" v-else>
+                    
+                  </span>
+
+                  <span class="tag tag-soft">
+                    📅 {{ formatDate(s.next_due_at) }}
                   </span>
                 </div>
               </div>
 
-              <div class="text-right shrink-0">
-                <div class="text-sm text-slate-300">
-                  {{ humanDiff(getServiceDate(s)) }}
-                </div>
+              <div class="text-xs text-slate-400 shrink-0">
+                {{ s.is_active ? "Aktywne" : "Nieaktywne" }}
               </div>
             </li>
           </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTY: POJAZDY + URZĄDZENIA -->
+    <div class="grid gap-4 lg:grid-cols-2">
+      <!-- POJAZDY -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Pojazdy</div>
+            <div class="card-subtitle">Kliknij aby wejść w szczegóły</div>
+          </div>
+          <span class="pill">{{ vehicles.length }}</span>
+        </div>
+
+        <div class="card-body">
+          <div v-if="vehicles.length === 0" class="text-slate-400 text-sm">
+            Brak pojazdów
+          </div>
+
+          <ul v-else class="divide-y divide-slate-800/60">
+            <li v-for="v in vehicles" :key="v.id" class="py-2 flex items-center justify-between gap-3">
+              <RouterLink
+                class="font-medium hover:underline underline-offset-2 truncate"
+                :to="{ name: 'vehicle.show', params: { id: v.id } }"
+              >
+                {{ v.name }}
+              </RouterLink>
+
+              <span class="text-sm text-slate-400 shrink-0 truncate">
+                {{ [v.brand, v.model].filter(Boolean).join(" ") }}
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- URZĄDZENIA -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Urządzenia</div>
+            <div class="card-subtitle">Kliknij aby wejść w dokumenty</div>
+          </div>
+          <span class="pill">{{ devices.length }}</span>
+        </div>
+
+        <div class="card-body">
+          <div v-if="devices.length === 0" class="text-slate-400 text-sm">
+            Brak urządzeń
+          </div>
+
+          <ul v-else class="divide-y divide-slate-800/60">
+            <li v-for="d in devices" :key="d.id" class="py-2 flex items-center justify-between gap-3">
+              <RouterLink
+                class="font-medium hover:underline underline-offset-2 truncate"
+                :to="{ name: 'device.show', params: { id: d.id } }"
+              >
+                {{ d.name }}
+              </RouterLink>
+
+              <span class="text-sm text-slate-400 shrink-0 truncate">
+                {{ d.type || "urządzenie" }}
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="card">
+      <div class="card-body flex flex-wrap gap-3 items-center justify-between">
+        <div class="text-sm text-slate-300">
+          Szybkie akcje:
+        </div>
+        <div class="flex gap-2">
+          <RouterLink class="btn" to="/upload">Upload dokumentu</RouterLink>
+          <RouterLink class="btn" to="/documents">Lista dokumentów</RouterLink>
         </div>
       </div>
     </div>
@@ -138,207 +261,140 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { onMounted, ref, computed, reactive } from "vue";
 import api from "../services/api";
 
-// ---------- UI helpers ----------
-function toDate(x) {
+const loading = ref(false);
+const error = ref("");
+
+const vehicles = ref([]);
+const devices = ref([]);
+const reminders = ref([]);
+const services = ref([]);
+
+const stats = reactive({
+  vehicles: 0,
+  devices: 0,
+  documents: 0,
+  activeReminders: 0,
+});
+
+function safeArray(data) {
+  return Array.isArray(data) ? data : (data?.data ?? []);
+}
+
+async function fetchList(url) {
+  const res = await api.get(url);
+  return safeArray(res.data);
+}
+
+async function fetchCount(url) {
+  const res = await api.get(url);
+  // jeśli API zwraca listę -> policz
+  const arr = safeArray(res.data);
+  if (Array.isArray(arr)) return arr.length;
+
+  // jeśli API zwraca {count: X}
+  if (typeof res.data?.count === "number") return res.data.count;
+
+  // fallback:
+  return 0;
+}
+
+function parseDateTime(x) {
   if (!x) return null;
   const d = new Date(x);
   return isNaN(d.getTime()) ? null : d;
 }
+
 function formatDateTime(x) {
-  const d = toDate(x);
+  const d = parseDateTime(x);
   if (!d) return "—";
-  return new Intl.DateTimeFormat("pl-PL", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(d);
+  return d.toLocaleString();
 }
+
 function formatDate(x) {
-  const d = toDate(x);
+  const d = parseDateTime(x);
   if (!d) return "—";
-  return new Intl.DateTimeFormat("pl-PL", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(d);
-}
-function humanDiff(x) {
-  const d = toDate(x);
-  if (!d) return "";
-  const now = new Date();
-  const diffMs = d.getTime() - now.getTime();
-  const abs = Math.abs(diffMs);
-
-  const minutes = Math.round(abs / 60000);
-  const hours = Math.round(abs / 3600000);
-  const days = Math.round(abs / 86400000);
-
-  const future = diffMs >= 0;
-
-  if (minutes < 60) return future ? `za ${minutes} min` : `${minutes} min temu`;
-  if (hours < 48) return future ? `za ${hours} h` : `${hours} h temu`;
-  return future ? `za ${days} dni` : `${days} dni temu`;
+  return d.toLocaleDateString();
 }
 
-// reminder: prefer remind_at, fallback due_at
-function getReminderDate(r) {
-  return r?.remind_at ?? r?.due_at ?? null;
-}
-function getServiceDate(s) {
-  return s?.next_due_at ?? null;
+function vehicleName(id) {
+  if (!id) return null;
+  const v = vehicles.value.find((x) => x.id === id);
+  return v?.name || `Pojazd #${id}`;
 }
 
-// ---------- state ----------
-const loading = ref(false);
-const error = ref("");
+function deviceName(id) {
+  if (!id) return null;
+  const d = devices.value.find((x) => x.id === id);
+  return d?.name || `Urządzenie #${id}`;
+}
 
-const stats = reactive({
-  devices: 0,
-  vehicles: 0,
-  remindersActive: 0,
-  servicesActive: 0,
-  documents: 0,
-});
-
-const reminders = ref([]);
-const services = ref([]);
-
-const upcomingReminders = computed(() => {
-  const list = (reminders.value || [])
-    .filter((r) => {
-      // tylko aktywne + nieukończone
-      const active = r?.is_active === 1 || r?.is_active === true || r?.is_active === "1";
-      const notDone = !r?.completed_at;
-      return active && notDone;
+const nearestReminders = computed(() => {
+  const list = [...reminders.value]
+    .filter((r) => r && (r.is_active === 1 || r.is_active === true))
+    .sort((a, b) => {
+      const da = parseDateTime(a.due_at || a.remind_at)?.getTime() ?? Infinity;
+      const db = parseDateTime(b.due_at || b.remind_at)?.getTime() ?? Infinity;
+      return da - db;
     })
-    .map((r) => ({ ...r, __date: toDate(getReminderDate(r)) }))
-    .filter((r) => r.__date)
-    .sort((a, b) => a.__date - b.__date)
-    .slice(0, 5);
+    .slice(0, 6);
 
   return list;
 });
 
-const upcomingServices = computed(() => {
-  const list = (services.value || [])
-    .filter((s) => s?.is_active === 1 || s?.is_active === true || s?.is_active === "1")
-    .map((s) => ({ ...s, __date: toDate(getServiceDate(s)) }))
-    .filter((s) => s.__date)
-    .sort((a, b) => a.__date - b.__date)
-    .slice(0, 5);
+const nearestServices = computed(() => {
+  const list = [...services.value]
+    .filter((s) => s && (s.is_active === 1 || s.is_active === true))
+    .sort((a, b) => {
+      const da = parseDateTime(a.next_due_at)?.getTime() ?? Infinity;
+      const db = parseDateTime(b.next_due_at)?.getTime() ?? Infinity;
+      return da - db;
+    })
+    .slice(0, 6);
 
   return list;
 });
-
-// ---------- API ----------
-async function fetchCount(path) {
-  const res = await api.get(path);
-  // zakładamy, że API zwraca tablicę (Twoje resource index najpewniej tak robi)
-  return Array.isArray(res.data) ? res.data.length : (res.data?.data?.length ?? 0);
-}
-
-async function fetchList(path) {
-  const res = await api.get(path);
-  return Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
-}
 
 async function refresh() {
   loading.value = true;
   error.value = "";
 
   try {
-    // równolegle, żeby było szybciej
     const [
-      devicesCount,
-      vehiclesCount,
+      devicesList,
+      vehiclesList,
       docsCount,
       remindersList,
       servicesList,
     ] = await Promise.all([
-      fetchCount("/api/devices"),
-      fetchCount("/api/vehicles"),
+      fetchList("/api/devices"),
+      fetchList("/api/vehicles"),
       fetchCount("/api/documents"),
       fetchList("/api/reminders"),
       fetchList("/api/services"),
     ]);
 
-    stats.devices = devicesCount;
-    stats.vehicles = vehiclesCount;
-    stats.documents = docsCount;
+    devices.value = devicesList;
+    vehicles.value = vehiclesList;
 
     reminders.value = remindersList;
     services.value = servicesList;
 
-    stats.remindersActive = remindersList.filter((r) => (r?.is_active == 1 || r?.is_active === true || r?.is_active === "1") && !r?.completed_at).length;
-    stats.servicesActive = servicesList.filter((s) => (s?.is_active == 1 || s?.is_active === true || s?.is_active === "1")).length;
+    stats.devices = devicesList.length;
+    stats.vehicles = vehiclesList.length;
+    stats.documents = docsCount;
+    stats.activeReminders = remindersList.filter((r) => r && (r.is_active === 1 || r.is_active === true)).length;
   } catch (e) {
     error.value =
       e?.response?.data?.message ||
       e?.message ||
-      "Nie udało się pobrać danych do dashboardu.";
+      "Błąd pobierania danych dashboardu.";
   } finally {
     loading.value = false;
   }
 }
 
 onMounted(refresh);
-
-// ---------- inline component ----------
-const StatCard = {
-  props: {
-    title: { type: String, required: true },
-    value: { type: Number, default: 0 },
-    loading: { type: Boolean, default: false },
-  },
-  template: `
-    <div class="rounded-2xl border border-slate-800/60 bg-slate-900/30 p-4">
-      <div class="text-sm text-slate-400">{{ title }}</div>
-      <div class="mt-2 text-3xl font-semibold tracking-tight">
-        <span v-if="loading" class="inline-block h-8 w-16 animate-pulse rounded bg-slate-800/70"></span>
-        <span v-else>{{ value }}</span>
-      </div>
-    </div>
-  `,
-};
 </script>
-
-<style scoped>
-.card {
-  @apply rounded-2xl border border-slate-800/60 bg-slate-900/30 overflow-hidden;
-}
-.card-header {
-  @apply p-4 border-b border-slate-800/60 flex items-start justify-between gap-4;
-}
-.card-title {
-  @apply text-base font-semibold;
-}
-.card-subtitle {
-  @apply text-sm text-slate-400 mt-1;
-}
-.card-body {
-  @apply p-4;
-}
-.btn {
-  @apply px-3 py-2 rounded-xl border border-slate-800/60 bg-slate-900/40 hover:bg-slate-900/70 transition text-sm;
-}
-.btn:disabled {
-  @apply opacity-60 cursor-not-allowed;
-}
-.btn-red {
-  @apply border-red-500/30 bg-red-500/10 hover:bg-red-500/15;
-}
-.tag {
-  @apply inline-flex items-center rounded-full border border-slate-800/70 bg-slate-900/50 px-2.5 py-1 text-xs text-slate-200;
-}
-.pill {
-  @apply inline-flex items-center rounded-full border border-slate-800/70 bg-slate-900/50 px-2.5 py-1 text-xs text-slate-200;
-}
-.mono {
-  @apply font-mono text-slate-200;
-}
-</style>
