@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { useAuth } from "./composables/useAuth";
+import { getToken, bootstrapAuth } from "./services/api";
 
 import DashboardView from "./views/DashboardView.vue";
 import DocumentsView from "./views/DocumentsView.vue";
@@ -10,12 +10,12 @@ import RegisterView from "./views/RegisterView.vue";
 const routes = [
   { path: "/", redirect: "/dashboard" },
 
-  { path: "/login", name: "login", component: LoginView, meta: { guestOnly: true } },
-  { path: "/register", name: "register", component: RegisterView, meta: { guestOnly: true } },
+  { path: "/login", component: LoginView, meta: { guestOnly: true } },
+  { path: "/register", component: RegisterView, meta: { guestOnly: true } },
 
-  { path: "/dashboard", name: "dashboard", component: DashboardView, meta: { requiresAuth: true } },
-  { path: "/documents", name: "documents", component: DocumentsView, meta: { requiresAuth: true } },
-  { path: "/upload", name: "upload", component: UploadView, meta: { requiresAuth: true } },
+  { path: "/dashboard", component: DashboardView, meta: { requiresAuth: true } },
+  { path: "/documents", component: DocumentsView, meta: { requiresAuth: true } },
+  { path: "/upload", component: UploadView, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({
@@ -23,21 +23,20 @@ const router = createRouter({
   routes,
 });
 
+let bootstrapped = false;
+
 router.beforeEach(async (to) => {
-  const auth = useAuth();
-
-  // Po odświeżeniu: jeśli jest token, dociągnij usera raz.
-  if (auth.isLoggedIn() && !auth.user.value) {
-    await auth.fetchMe();
+  if (!bootstrapped) {
+    bootstrapped = true;
+    await bootstrapAuth();
   }
 
-  if (to.meta.requiresAuth && !auth.isLoggedIn()) {
-    return { name: "login" };
-  }
+  const hasToken = !!getToken();
 
-  if (to.meta.guestOnly && auth.isLoggedIn()) {
-    return { name: "dashboard" };
-  }
+  if (to.meta.requiresAuth && !hasToken) return "/login";
+  if (to.meta.guestOnly && hasToken) return "/dashboard";
+
+  return true;
 });
 
 export default router;
