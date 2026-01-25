@@ -47,22 +47,22 @@
   
           <div class="grid md:grid-cols-2 gap-4">
             <div class="grid gap-2">
-              <label class="label">Ostatnio wykonano (last_done_at)</label>
+              <label class="label">Ostatnio wykonano</label>
               <input type="date" class="input" v-model="form.last_done_at" />
             </div>
             <div class="grid gap-2">
-              <label class="label">Następny termin (next_due_at)</label>
+              <label class="label">Następny termin</label>
               <input type="date" class="input" v-model="form.next_due_at" />
             </div>
           </div>
   
           <div class="grid md:grid-cols-3 gap-4">
             <div class="grid gap-2">
-              <label class="label">Interwał (interval_value)</label>
+              <label class="label">Interwał</label>
               <input type="number" min="1" class="input" v-model.number="form.interval_value" placeholder="np. 12" />
             </div>
             <div class="grid gap-2">
-              <label class="label">Jednostka (interval_unit)</label>
+              <label class="label">Jednostka</label>
               <select class="select" v-model="form.interval_unit">
                 <option value="">— wybierz —</option>
                 <option value="days">dni</option>

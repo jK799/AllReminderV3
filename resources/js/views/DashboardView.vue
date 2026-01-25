@@ -212,9 +212,9 @@
         </div>
         <div class="flex gap-2">
           <RouterLink class="btn" to="/vehicles/new">+ Dodaj pojazd</RouterLink>
-          <RouterLink class="btn" to="/devices/new">+ Dodaj urządzenie</RouterLink>
-          <RouterLink class="btn" to="/services/new">+ Dodaj serwis</RouterLink>
-          <RouterLink class="btn" to="/reminders/new">+ Dodaj przypomnienie</RouterLink>
+<RouterLink class="btn" to="/devices/new">+ Dodaj urządzenie</RouterLink>
+<RouterLink class="btn" to="/services/new">+ Dodaj serwis</RouterLink>
+<RouterLink class="btn" to="/reminders/new">+ Dodaj przypomnienie</RouterLink>
           <RouterLink class="btn btn-soft" to="/documents">Lista dokumentów</RouterLink>
           <RouterLink class="btn" to="/upload">Upload dokumentu</RouterLink>
         </div>
