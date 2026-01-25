@@ -65,9 +65,11 @@
 
           <div class="flex items-center justify-between gap-2">
             <a
-              :href="doc.url"
+              :href="getDocUrl(doc) || '#'"
               target="_blank"
+              rel="noopener"
               class="btn btn-soft"
+              @click.prevent="openDoc(doc)"
             >
               📄 Otwórz
             </a>
@@ -123,6 +125,53 @@ async function remove(id) {
         "Nie udało się usunąć dokumentu."
     );
   }
+}
+
+function getDocUrl(doc) {
+  if (!doc) return null;
+
+  // 1) Jeśli backend już zwraca pełny URL
+  if (doc.url && typeof doc.url === "string") {
+    return doc.url;
+  }
+
+  // 2) Często spotykane pola z backendu (różne nazwy)
+  const raw =
+    doc.path ||
+    doc.file_path ||
+    doc.storage_path ||
+    doc.disk_path ||
+    doc.location ||
+    doc.file ||
+    null;
+
+  if (!raw || typeof raw !== "string") return null;
+
+  // 3) Jeśli to już jest link absolutny
+  if (raw.startsWith("http://") || raw.startsWith("https://")) {
+    return raw;
+  }
+
+  // 4) Jeśli zaczyna się od /storage lub /uploads itp. – traktuj jako ścieżkę publiczną
+  if (raw.startsWith("/")) {
+    return raw;
+  }
+
+  // 5) Jeśli to wygląda jak ścieżka w storage (np. documents/xxx.pdf), podpinamy pod /storage/
+  return `/storage/${raw}`;
+}
+
+function openDoc(doc) {
+  const url = getDocUrl(doc);
+
+  if (!url) {
+    alert(
+      "Nie mam adresu URL do podglądu tego dokumentu. Upewnij się, że backend zwraca pole `url` albo `path` (np. ścieżka do pliku w /storage)."
+    );
+    return;
+  }
+
+  window.open(url, "_blank", "noopener");
 }
 
 function formatDate(date) {
