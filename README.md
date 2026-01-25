@@ -79,7 +79,98 @@ Baza danych została zaprojektowana zgodnie z zasadami **3 postaci normalnej (3N
 - `reminders`
 - `services`
 
-Baza danych zawiera **minimum 30 rekordów testowych**.
+erDiagram
+  USERS {
+    int id PK
+    string name
+    string email
+    datetime created_at
+    datetime updated_at
+  }
+
+  VEHICLES {
+    int id PK
+    int user_id FK
+    string name
+    string make
+    string model
+    string year
+    string vin
+    string license_plate
+    date purchase_date
+    text notes
+    datetime created_at
+    datetime updated_at
+  }
+
+  DEVICES {
+    int id PK
+    int user_id FK
+    string name
+    string brand
+    string model
+    string serial_number
+    date purchase_date
+    text notes
+    datetime created_at
+    datetime updated_at
+  }
+
+  SERVICES {
+    int id PK
+    int user_id FK
+    int device_id FK
+    int vehicle_id FK
+    string title
+    text description
+    date last_done_at
+    date next_due_at
+    int interval_value
+    string interval_unit
+    boolean is_active
+    datetime created_at
+    datetime updated_at
+  }
+
+  REMINDERS {
+    int id PK
+    int user_id FK
+    int device_id FK
+    int vehicle_id FK
+    string title
+    text description
+    datetime due_at
+    datetime completed_at
+    boolean is_active
+    datetime created_at
+    datetime updated_at
+    datetime remind_at
+  }
+
+  DOCUMENTS {
+    int id PK
+    int user_id FK
+    string title
+    text notes
+    string original_name
+    string path
+    string mime_type
+    int size
+    datetime created_at
+    datetime updated_at
+  }
+
+  USERS ||--o{ VEHICLES : owns
+  USERS ||--o{ DEVICES : owns
+  USERS ||--o{ SERVICES : manages
+  USERS ||--o{ REMINDERS : manages
+  USERS ||--o{ DOCUMENTS : uploads
+
+  VEHICLES ||--o{ SERVICES : has
+  DEVICES ||--o{ SERVICES : has
+
+  VEHICLES ||--o{ REMINDERS : has
+  DEVICES ||--o{ REMINDERS : has
 
 ---
 
