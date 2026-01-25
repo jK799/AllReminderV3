@@ -85,10 +85,6 @@
               </div>
             </div>
   
-            <div class="shrink-0 text-right text-xs text-slate-400">
-              <div>ID: {{ d.id }}</div>
-              <div v-if="d.updated_at" class="mt-1">Akt.: {{ fmtDateTime(d.updated_at) }}</div>
-            </div>
           </div>
         </RouterLink>
       </div>
