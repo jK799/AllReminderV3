@@ -1,14 +1,14 @@
 # AllReminderV3
 
 AllReminderV3 to nowoczesna aplikacja webowa typu **full-stack (SPA + REST API)**, stworzona w ramach przedmiotu **ZTPAI**.  
-Aplikacja umożliwia użytkownikowi zarządzanie:
+Aplikacja umożliwia użytkownikowi kompleksowe zarządzanie:
 - pojazdami,
 - urządzeniami,
 - dokumentami,
 - serwisami,
 - przypomnieniami.
 
-Projekt spełnia komplet wymagań projektowych określonych przez prowadzącego.
+Projekt został wykonany samodzielnie i spełnia komplet wymagań projektowych określonych przez prowadzącego.
 
 ---
 
@@ -17,10 +17,12 @@ Projekt spełnia komplet wymagań projektowych określonych przez prowadzącego.
 Celem projektu było zaprojektowanie i zaimplementowanie kompletnej aplikacji webowej:
 - z wyraźnym podziałem na backend i frontend,
 - z poprawnie zaprojektowaną bazą danych w 3 postaci normalnej (3NF),
-- z autoryzacją użytkowników,
-- z realną komunikacją frontend–backend przez REST API,
+- z mechanizmem uwierzytelniania i autoryzacji użytkowników,
+- z komunikacją frontend–backend poprzez REST API,
 - z nowoczesnym i responsywnym interfejsem użytkownika,
-- z czytelną i spójną historią repozytorium Git.
+- z czytelną i logiczną historią repozytorium Git.
+
+Projekt odwzorowuje realny system do zarządzania danymi użytkownika w kontekście pojazdów, urządzeń, dokumentów oraz terminów serwisowych.
 
 ---
 
@@ -29,17 +31,19 @@ Celem projektu było zaprojektowanie i zaimplementowanie kompletnej aplikacji we
 Aplikacja została zaprojektowana w architekturze **SPA + REST API**.
 
 ### Backend
-- udostępnia REST API,
-- realizuje logikę biznesową,
-- waliduje dane,
-- zarządza bazą danych,
-- obsługuje uwierzytelnianie użytkowników.
+Backend odpowiada za:
+- udostępnianie REST API,
+- realizację logiki biznesowej,
+- walidację danych wejściowych,
+- zarządzanie bazą danych,
+- uwierzytelnianie i autoryzację użytkowników.
 
 ### Frontend
-- aplikacja typu Single Page Application,
+Frontend to aplikacja typu **Single Page Application**, która:
 - komunikuje się wyłącznie z API,
 - nie ma bezpośredniego dostępu do bazy danych,
-- obsługuje routing, widoki oraz stany aplikacji.
+- zarządza routingiem i stanem aplikacji,
+- prezentuje dane użytkownikowi w postaci widoków i formularzy.
 
 Komunikacja odbywa się w formacie **JSON over HTTP**.
 
@@ -63,7 +67,7 @@ Komunikacja odbywa się w formacie **JSON over HTTP**.
 - Vue Router
 
 ### Uzasadnienie doboru technologii
-Laravel zapewnia szybkie i bezpieczne tworzenie API oraz czytelną architekturę backendu.  
+Laravel zapewnia szybkie tworzenie bezpiecznego API oraz czytelną architekturę backendu.  
 Vue 3 z Composition API umożliwia modularną i skalowalną logikę frontendową.  
 Tailwind CSS pozwala na spójny, nowoczesny i responsywny interfejs użytkownika.  
 SQLite upraszcza konfigurację środowiska lokalnego.
@@ -72,12 +76,12 @@ SQLite upraszcza konfigurację środowiska lokalnego.
 
 ## 4. Baza danych
 
-Baza danych została zaprojektowana zgodnie z zasadami **3NF**:
+Baza danych została zaprojektowana zgodnie z zasadami **3NF (Third Normal Form)**:
 - brak redundancji danych,
-- jednoznaczne relacje,
-- logiczny podział encji.
+- jednoznaczne relacje pomiędzy encjami,
+- logiczny podział odpowiedzialności tabel.
 
-W bazie znajduje się minimum **30 rekordów testowych**.
+W bazie danych znajduje się minimum **30 rekordów testowych**.
 
 ### Tabele:
 - users
@@ -90,6 +94,8 @@ W bazie znajduje się minimum **30 rekordów testowych**.
 ---
 
 ## 5. Diagram ERD
+
+Diagram ERD odzwierciedla rzeczywistą strukturę bazy danych zaimplementowaną w projekcie.
 
 ```mermaid
 erDiagram
@@ -183,3 +189,95 @@ erDiagram
   DEVICES ||--o{ SERVICES : has
   VEHICLES ||--o{ REMINDERS : has
   DEVICES ||--o{ REMINDERS : has
+
+---
+
+## 6. Uwierzytelnianie i autoryzacja
+
+Aplikacja wykorzystuje **tokenowe uwierzytelnianie Bearer Token** oparte o **Laravel Sanctum**.
+
+Zaimplementowano:
+- rejestrację użytkownika,
+- logowanie użytkownika,
+- generowanie tokenów dostępu,
+- przechowywanie tokenu po stronie frontendu,
+- automatyczne przywracanie sesji po odświeżeniu strony,
+- ochronę tras wymagających zalogowania,
+- wylogowanie użytkownika.
+
+---
+
+## 7. REST API
+
+Backend udostępnia REST API zgodne z zasadami REST.
+
+Przykładowe endpointy:
+- POST /api/login
+- POST /api/register
+- POST /api/logout
+- GET /api/me
+- GET /api/vehicles
+- POST /api/vehicles
+- GET /api/vehicles/{id}
+- GET /api/devices
+- POST /api/devices
+- POST /api/documents/upload
+- POST /api/services
+- POST /api/reminders
+
+---
+
+## 8. Frontend i interfejs użytkownika
+
+Frontend został zrealizowany jako **Single Page Application**.
+
+Zaimplementowane funkcjonalności:
+- dashboard z podsumowaniem danych,
+- lista i szczegóły pojazdów,
+- lista i szczegóły urządzeń,
+- upload i lista dokumentów,
+- formularze dodawania danych,
+- nawigacja i routing,
+- obsługa stanów loading i błędów.
+
+---
+
+## 9. Repozytorium Git
+
+Projekt zarządzany jest przy użyciu systemu Git.
+
+Repozytorium:
+https://github.com/jK799/AllReminderV3
+
+---
+
+## 10. Uruchomienie projektu
+
+### Backend
+composer install  
+cp .env.example .env  
+php artisan key:generate  
+php artisan migrate  
+php artisan serve  
+
+Backend: http://localhost:8000
+
+### Frontend
+npm install  
+npm run dev  
+
+Frontend: http://localhost:5173
+
+---
+
+## 11. Struktura projektu
+
+app/Http/Controllers/Api  
+resources/js (views, components, composables, services)  
+database/migrations  
+
+---
+
+## 12. Autor
+
+Autor: Jakub Hruby
