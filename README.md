@@ -183,7 +183,3 @@ erDiagram
   DEVICES ||--o{ SERVICES : has
   VEHICLES ||--o{ REMINDERS : has
   DEVICES ||--o{ REMINDERS : has
-
----
-
-## 4. Baza danych
