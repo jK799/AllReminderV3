@@ -20,7 +20,7 @@
 
         <nav class="flex items-center gap-2 text-sm">
           <RouterLink class="nav-link" to="/dashboard">Dashboard</RouterLink>
-          <RouterLink class="hover:text-white text-slate-300" to="/vehicles">Pojazdy</RouterLink>
+          <RouterLink class="nav-link" to="/vehicles">Pojazdy</RouterLink>
           <RouterLink class="nav-link" to="/documents">Dokumenty</RouterLink>
           <RouterLink class="nav-link" to="/upload">Upload</RouterLink>
 

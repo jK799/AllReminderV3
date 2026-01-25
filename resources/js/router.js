@@ -7,18 +7,15 @@ import UploadView from "./views/UploadView.vue";
 import LoginView from "./views/LoginView.vue";
 import RegisterView from "./views/RegisterView.vue";
 
+import VehiclesView from "./views/VehiclesView.vue";
+
 import VehicleDetailView from "./views/VehicleDetailView.vue";
 import DeviceDetailView from "./views/DeviceDetailView.vue";
-
-import NewVehicleView from "./views/NewVehicleView.vue";
-import NewDeviceView from "./views/NewDeviceView.vue";
 
 import VehicleCreateView from "./views/VehicleCreateView.vue";
 import DeviceCreateView from "./views/DeviceCreateView.vue";
 import ServiceCreateView from "./views/ServiceCreateView.vue";
 import ReminderCreateView from "./views/ReminderCreateView.vue";
-
-
 
 const routes = [
   { path: "/", redirect: "/dashboard" },
@@ -30,19 +27,15 @@ const routes = [
   { path: "/documents", component: DocumentsView, meta: { requiresAuth: true }, name: "documents" },
   { path: "/upload", component: UploadView, meta: { requiresAuth: true }, name: "upload" },
 
+  { path: "/vehicles", component: VehiclesView, meta: { requiresAuth: true }, name: "vehicles" },
+
+  { path: "/vehicles/new", component: VehicleCreateView, meta: { requiresAuth: true }, name: "vehicle.new" },
+  { path: "/devices/new", component: DeviceCreateView, meta: { requiresAuth: true }, name: "device.new" },
+  { path: "/services/new", component: ServiceCreateView, meta: { requiresAuth: true }, name: "service.new" },
+  { path: "/reminders/new", component: ReminderCreateView, meta: { requiresAuth: true }, name: "reminder.new" },
+
   { path: "/vehicles/:id", component: VehicleDetailView, meta: { requiresAuth: true }, name: "vehicle.show" },
   { path: "/devices/:id", component: DeviceDetailView, meta: { requiresAuth: true }, name: "device.show" },
-
-  { path: "/vehicles/new", component: NewVehicleView, meta: { requiresAuth: true } },
-{ path: "/devices/new", component: NewDeviceView, meta: { requiresAuth: true } },
-
-{ path: "/vehicles/new", component: VehicleCreateView, meta: { requiresAuth: true } },
-{ path: "/devices/new", component: DeviceCreateView, meta: { requiresAuth: true } },
-{ path: "/services/new", component: ServiceCreateView, meta: { requiresAuth: true } },
-{ path: "/reminders/new", component: ReminderCreateView, meta: { requiresAuth: true } },
-
-
-
 ];
 
 const router = createRouter({
