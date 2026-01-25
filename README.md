@@ -1,14 +1,12 @@
 # AllReminderV3
 
-AllReminderV3 to nowoczesna aplikacja webowa typu **full-stack (SPA + REST API)**, stworzona w ramach przedmiotu **ZTPAI**.  
+AllReminderV3 to nowoczesna aplikacja webowa typu **full-stack (SPA + REST API)**.
 Aplikacja umożliwia użytkownikowi kompleksowe zarządzanie:
 - pojazdami,
 - urządzeniami,
 - dokumentami,
 - serwisami,
 - przypomnieniami.
-
-Projekt został wykonany samodzielnie i spełnia komplet wymagań projektowych określonych przez prowadzącego.
 
 ---
 
@@ -81,7 +79,6 @@ Baza danych została zaprojektowana zgodnie z zasadami **3NF (Third Normal Form)
 - jednoznaczne relacje pomiędzy encjami,
 - logiczny podział odpowiedzialności tabel.
 
-W bazie danych znajduje się minimum **30 rekordów testowych**.
 
 ### Tabele:
 - users
