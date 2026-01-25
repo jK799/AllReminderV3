@@ -22,6 +22,7 @@
           <RouterLink class="nav-link" to="/dashboard">Dashboard</RouterLink>
           <RouterLink class="nav-link" to="/vehicles">Pojazdy</RouterLink>
           <RouterLink class="nav-link" to="/documents">Dokumenty</RouterLink>
+          <RouterLink class="nav-link" to="/devices">Urządzenia</RouterLink>
           <RouterLink class="nav-link" to="/upload">Upload</RouterLink>
 
           <div class="mx-2 hidden sm:block h-6 w-px bg-slate-800/70"></div>

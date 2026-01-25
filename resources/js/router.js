@@ -8,6 +8,7 @@ import LoginView from "./views/LoginView.vue";
 import RegisterView from "./views/RegisterView.vue";
 
 import VehiclesView from "./views/VehiclesView.vue";
+import DevicesView from "./views/DevicesView.vue";
 
 import VehicleDetailView from "./views/VehicleDetailView.vue";
 import DeviceDetailView from "./views/DeviceDetailView.vue";
@@ -28,6 +29,7 @@ const routes = [
   { path: "/upload", component: UploadView, meta: { requiresAuth: true }, name: "upload" },
 
   { path: "/vehicles", component: VehiclesView, meta: { requiresAuth: true }, name: "vehicles" },
+  { path: "/devices", component: DevicesView, meta: { requiresAuth: true }, name: "devices" },
 
   { path: "/vehicles/new", component: VehicleCreateView, meta: { requiresAuth: true }, name: "vehicle.new" },
   { path: "/devices/new", component: DeviceCreateView, meta: { requiresAuth: true }, name: "device.new" },
