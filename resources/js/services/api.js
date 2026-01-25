@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "", // wołamy po prostu /api/...
+  baseURL: "",
   headers: {
     Accept: "application/json",
   },
@@ -40,7 +40,7 @@ export function clearStoredUser() {
   localStorage.removeItem(USER_KEY);
 }
 
-// ====== BOOTSTRAP (po odświeżeniu) ======
+// ====== BOOTSTRAP ======
 export async function bootstrapAuth() {
   const token = getToken();
   if (!token) return null;
@@ -83,7 +83,6 @@ export async function logout() {
   try {
     await api.post("/api/logout");
   } catch (_) {
-    // ignorujemy
   }
   clearToken();
   clearStoredUser();

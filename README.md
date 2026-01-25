@@ -1,84 +1,97 @@
 # AllReminderV3
 
-AllReminderV3 to nowoczesna aplikacja webowa typu **full-stack**, służąca do zarządzania:
+AllReminderV3 to nowoczesna aplikacja webowa typu **full-stack (SPA + REST API)**, stworzona w ramach przedmiotu **ZTPAI**.  
+Aplikacja umożliwia użytkownikowi zarządzanie:
 - pojazdami,
 - urządzeniami,
 - dokumentami,
-- przypomnieniami i serwisami.
+- serwisami,
+- przypomnieniami.
 
-Projekt został wykonany jako aplikacja **SPA + REST API** i spełnia wymagania projektowe z przedmiotu **ZTPAI**.
+Projekt spełnia komplet wymagań projektowych określonych przez prowadzącego.
 
 ---
 
-## 📌 Cel projektu
+## 1. Cel projektu
 
-Celem projektu było stworzenie kompletnej aplikacji:
-- z wyraźnym podziałem backend / frontend,
-- z poprawnie zaprojektowaną bazą danych (3NF),
+Celem projektu było zaprojektowanie i zaimplementowanie kompletnej aplikacji webowej:
+- z wyraźnym podziałem na backend i frontend,
+- z poprawnie zaprojektowaną bazą danych w 3 postaci normalnej (3NF),
 - z autoryzacją użytkowników,
-- z nowoczesnym interfejsem użytkownika,
-- z czytelną historią repozytorium Git.
+- z realną komunikacją frontend–backend przez REST API,
+- z nowoczesnym i responsywnym interfejsem użytkownika,
+- z czytelną i spójną historią repozytorium Git.
 
 ---
 
-## 🧱 Architektura aplikacji
+## 2. Architektura aplikacji
 
-Aplikacja została podzielona na dwie niezależne warstwy:
+Aplikacja została zaprojektowana w architekturze **SPA + REST API**.
 
 ### Backend
-- REST API
-- odpowiedzialny za logikę biznesową, walidację danych i dostęp do bazy
+- udostępnia REST API,
+- realizuje logikę biznesową,
+- waliduje dane,
+- zarządza bazą danych,
+- obsługuje uwierzytelnianie użytkowników.
 
 ### Frontend
-- Single Page Application (SPA)
-- komunikuje się wyłącznie przez API
-- brak bezpośredniego dostępu do bazy danych
+- aplikacja typu Single Page Application,
+- komunikuje się wyłącznie z API,
+- nie ma bezpośredniego dostępu do bazy danych,
+- obsługuje routing, widoki oraz stany aplikacji.
 
-Komunikacja odbywa się przez **JSON over HTTP**.
+Komunikacja odbywa się w formacie **JSON over HTTP**.
 
 ---
 
-## 🛠️ Technologie
+## 3. Zastosowane technologie
 
 ### Backend
-- **Laravel 12**
+- Laravel 12
 - PHP 8.2+
-- Laravel Sanctum (tokeny Bearer)
+- Laravel Sanctum (Bearer Token)
 - Eloquent ORM
 - SQLite
 - REST API
 
 ### Frontend
-- **Vue 3 (Composition API)**
-- **Vite**
-- **Tailwind CSS**
+- Vue 3 (Composition API)
+- Vite
+- Tailwind CSS
 - Axios
 - Vue Router
 
-### Uzasadnienie wyboru technologii
-- Laravel umożliwia szybkie tworzenie bezpiecznego i czytelnego API.
-- Vue 3 + Composition API zapewnia modularność i skalowalność frontendowej logiki.
-- Tailwind CSS pozwala na spójny, nowoczesny i responsywny interfejs.
-- SQLite upraszcza konfigurację środowiska lokalnego.
+### Uzasadnienie doboru technologii
+Laravel zapewnia szybkie i bezpieczne tworzenie API oraz czytelną architekturę backendu.  
+Vue 3 z Composition API umożliwia modularną i skalowalną logikę frontendową.  
+Tailwind CSS pozwala na spójny, nowoczesny i responsywny interfejs użytkownika.  
+SQLite upraszcza konfigurację środowiska lokalnego.
 
 ---
 
-## 🗄️ Baza danych
+## 4. Baza danych
 
-Baza danych została zaprojektowana zgodnie z zasadami **3 postaci normalnej (3NF)**:
+Baza danych została zaprojektowana zgodnie z zasadami **3NF**:
 - brak redundancji danych,
-- jednoznaczne relacje między tabelami,
+- jednoznaczne relacje,
 - logiczny podział encji.
 
-### Główne tabele:
-- `users`
-- `vehicles`
-- `devices`
-- `documents`
-- `documentables` (relacja polymorficzna)
-- `reminders`
-- `services`
+W bazie znajduje się minimum **30 rekordów testowych**.
 
+### Tabele:
+- users
+- vehicles
+- devices
+- documents
+- reminders
+- services
+
+---
+
+## 5. Diagram ERD
+
+```mermaid
 erDiagram
   USERS {
     int id PK
@@ -119,8 +132,8 @@ erDiagram
   SERVICES {
     int id PK
     int user_id FK
-    int device_id FK
     int vehicle_id FK
+    int device_id FK
     string title
     text description
     date last_done_at
@@ -135,16 +148,16 @@ erDiagram
   REMINDERS {
     int id PK
     int user_id FK
-    int device_id FK
     int vehicle_id FK
+    int device_id FK
     string title
     text description
     datetime due_at
+    datetime remind_at
     datetime completed_at
     boolean is_active
     datetime created_at
     datetime updated_at
-    datetime remind_at
   }
 
   DOCUMENTS {
@@ -162,94 +175,15 @@ erDiagram
 
   USERS ||--o{ VEHICLES : owns
   USERS ||--o{ DEVICES : owns
+  USERS ||--o{ DOCUMENTS : uploads
   USERS ||--o{ SERVICES : manages
   USERS ||--o{ REMINDERS : manages
-  USERS ||--o{ DOCUMENTS : uploads
 
   VEHICLES ||--o{ SERVICES : has
   DEVICES ||--o{ SERVICES : has
-
   VEHICLES ||--o{ REMINDERS : has
   DEVICES ||--o{ REMINDERS : has
 
 ---
 
-## 🔐 Uwierzytelnianie i autoryzacja
-
-- rejestracja użytkownika,
-- logowanie użytkownika,
-- token Bearer zapisywany w `localStorage`,
-- ochrona endpointów backendu,
-- guardy tras w Vue Router,
-- automatyczne odtwarzanie sesji po odświeżeniu strony.
-
----
-
-## 🔌 API
-
-Backend udostępnia REST API:
-- zgodne ze standardami HTTP,
-- poprawne statusy odpowiedzi (`200`, `201`, `401`, `403`, `422`),
-- walidacja danych po stronie serwera.
-
-Przykładowe endpointy:
-- `POST /api/login`
-- `POST /api/register`
-- `GET /api/vehicles`
-- `POST /api/devices`
-- `POST /api/documents/upload`
-- `GET /api/reminders`
-
----
-
-## 🖥️ Frontend (UX/UI)
-
-- aplikacja responsywna (desktop / mobile),
-- nowoczesny, czytelny design,
-- dashboard z kafelkami statystyk,
-- listy pojazdów i urządzeń,
-- formularze CRUD,
-- upload dokumentów,
-- obsługa stanów `loading` i `error`,
-- czytelna nawigacja.
-
----
-
-## 🚀 Uruchomienie projektu
-
-### Backend
-
-```bash
-git clone https://github.com/jK799/AllReminderV3.git
-cd AllReminderV3
-
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate
-php artisan serve
-
-http://localhost:8000
-
-### Frontend
-npm install
-npm run dev
-
-http://localhost:5173
-
-### Struktura projektu
-app/
- └── Http/Controllers/Api
-
-resources/
- ├── js/
- │   ├── views/
- │   ├── components/
- │   ├── composables/
- │   ├── services/
- │   └── router.js
- └── css/
-
-database/
- ├── migrations/
- └── database.sqlite
+## 4. Baza danych
