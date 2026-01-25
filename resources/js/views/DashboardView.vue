@@ -36,7 +36,6 @@
         <div class="card-head">
           <div>
             <h2 class="card-title">Najbliższe przypomnienia</h2>
-            <p class="card-subtitle">Sortowane po terminie</p>
           </div>
           <span class="pill">{{ nearestReminders.length }}</span>
         </div>
@@ -86,7 +85,6 @@
         <div class="card-head">
           <div>
             <h2 class="card-title">Najbliższe serwisy</h2>
-            <p class="card-subtitle">Po dacie next_due_at</p>
           </div>
           <span class="pill">{{ nearestServices.length }}</span>
         </div>
@@ -139,7 +137,6 @@
         <div class="card-head">
           <div>
             <h2 class="card-title">Pojazdy</h2>
-            <p class="card-subtitle">Kliknij aby wejść w szczegóły</p>
           </div>
           <span class="pill">{{ vehicles.length }}</span>
         </div>
@@ -174,7 +171,6 @@
         <div class="card-head">
           <div>
             <h2 class="card-title">Urządzenia</h2>
-            <p class="card-subtitle">Kliknij aby wejść w dokumenty</p>
           </div>
           <span class="pill">{{ devices.length }}</span>
         </div>

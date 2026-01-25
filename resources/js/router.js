@@ -19,6 +19,7 @@ import ServiceCreateView from "./views/ServiceCreateView.vue";
 import ReminderCreateView from "./views/ReminderCreateView.vue";
 
 
+
 const routes = [
   { path: "/", redirect: "/dashboard" },
 
@@ -39,6 +40,8 @@ const routes = [
 { path: "/devices/new", component: DeviceCreateView, meta: { requiresAuth: true } },
 { path: "/services/new", component: ServiceCreateView, meta: { requiresAuth: true } },
 { path: "/reminders/new", component: ReminderCreateView, meta: { requiresAuth: true } },
+
+
 
 ];
 
