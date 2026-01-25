@@ -1,7 +1,5 @@
 # AllReminderV3
 
-# AllReminderV3
-
 AllReminderV3 to nowoczesna aplikacja webowa typu **full-stack**, służąca do zarządzania:
 - pojazdami,
 - urządzeniami,
