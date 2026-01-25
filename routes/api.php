@@ -12,7 +12,6 @@ use App\Http\Controllers\Api\DocumentController;
 
 Route::get('/ping', fn () => response()->json(['ok' => true]));
 
-// AUTH (public)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
 
