@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ReminderController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\DocumentController;
 
+
 Route::get('/ping', fn () => response()->json(['ok' => true]));
 
 // AUTH (public)

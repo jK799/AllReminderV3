@@ -13,6 +13,11 @@ import DeviceDetailView from "./views/DeviceDetailView.vue";
 import NewVehicleView from "./views/NewVehicleView.vue";
 import NewDeviceView from "./views/NewDeviceView.vue";
 
+import VehicleCreateView from "./views/VehicleCreateView.vue";
+import DeviceCreateView from "./views/DeviceCreateView.vue";
+import ServiceCreateView from "./views/ServiceCreateView.vue";
+import ReminderCreateView from "./views/ReminderCreateView.vue";
+
 
 const routes = [
   { path: "/", redirect: "/dashboard" },
@@ -29,6 +34,11 @@ const routes = [
 
   { path: "/vehicles/new", component: NewVehicleView, meta: { requiresAuth: true } },
 { path: "/devices/new", component: NewDeviceView, meta: { requiresAuth: true } },
+
+{ path: "/vehicles/new", component: VehicleCreateView, meta: { requiresAuth: true } },
+{ path: "/devices/new", component: DeviceCreateView, meta: { requiresAuth: true } },
+{ path: "/services/new", component: ServiceCreateView, meta: { requiresAuth: true } },
+{ path: "/reminders/new", component: ReminderCreateView, meta: { requiresAuth: true } },
 
 ];
 
