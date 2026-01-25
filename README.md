@@ -190,7 +190,7 @@ erDiagram
   VEHICLES ||--o{ REMINDERS : has
   DEVICES ||--o{ REMINDERS : has
 
----
+```
 
 ## 6. Uwierzytelnianie i autoryzacja
 
