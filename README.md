@@ -272,9 +272,53 @@ Frontend: http://localhost:5173
 
 ## 11. Struktura projektu
 
-app/Http/Controllers/Api  
-resources/js (views, components, composables, services)  
-database/migrations  
+Poniżej przedstawiono uproszczoną strukturę katalogów i plików istotnych dla projektu (backend + frontend):
+
+```text
+AllReminderV3/
+├─ app/
+│  ├─ Http/
+│  │  ├─ Controllers/
+│  │  │  └─ Api/                 # Kontrolery REST API (np. auth, vehicles, devices, documents)
+│  │  ├─ Middleware/             # Middleware (np. auth, CORS, itp.)
+│  │  └─ Requests/               # FormRequest (walidacja żądań)
+│  └─ Models/                    # Modele Eloquent (User, Vehicle, Device, Document, Service, Reminder)
+│
+├─ bootstrap/                    # Bootstrap aplikacji Laravel
+├─ config/                       # Konfiguracja aplikacji
+│
+├─ database/
+│  ├─ migrations/                # Migracje schematu bazy danych
+│  ├─ seeders/                   # Seedery (opcjonalnie)
+│  └─ database.sqlite            # Lokalna baza SQLite (jeśli commitowana w repo)
+│
+├─ public/                       # Publiczny katalog aplikacji (wejściowy index.php)
+├─ resources/
+│  ├─ css/                       # Style (Tailwind entry)
+│  ├─ js/
+│  │  ├─ components/             # Komponenty UI (np. AppLayout)
+│  │  ├─ composables/            # Logika współdzielona (np. useAuth)
+│  │  ├─ services/               # Warstwa komunikacji z API (axios, helpery)
+│  │  ├─ views/                  # Widoki stron (Dashboard, Vehicles, Devices, Documents, Upload itd.)
+│  │  ├─ router.js               # Konfiguracja Vue Router + guardy
+│  │  └─ app.js                  # Punkt startowy frontendu (Vite)
+│  └─ views/                     # Widoki Blade (głównie layout startowy dla SPA)
+│
+├─ routes/
+│  ├─ api.php                    # Trasy API (REST, auth:sanctum)
+│  └─ web.php                    # Trasy web (start SPA, fallback)
+│
+├─ storage/
+│  ├─ app/                       # Pliki aplikacji (np. uploady dokumentów)
+│  └─ logs/                      # Logi aplikacji
+│
+├─ tests/                        # Testy (opcjonalnie; mogą zostać rozwinięte później)
+├─ .env.example                  # Przykładowa konfiguracja środowiska
+├─ composer.json                 # Zależności PHP (Laravel)
+├─ package.json                  # Zależności JS (Vue/Vite/Tailwind)
+├─ vite.config.js                # Konfiguracja Vite
+└─ README.md                     # Dokumentacja projektu
+```
 
 ---
 
